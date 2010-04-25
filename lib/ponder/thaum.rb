@@ -107,7 +107,7 @@ module Ponder
       
       case message.chomp
       when /^PING \S+$/
-        raw message.chomp.gsub('PING', 'PONG')
+        raw message.chomp.sub(/PING/, 'PONG')
       
       when /^:\S+ (\d\d\d) /
         parse_type($1, :type => $1.to_sym, :params => $')
