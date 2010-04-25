@@ -102,12 +102,13 @@ module Ponder
     
     # parsing incoming traffic
     def parse(message)
-      @traffic_logger.info("<< #{message.chomp}") if @traffic_logger
-      puts "#{Time.now.strftime('%d.%m.%Y %H:%M:%S')} << #{message.chomp}" if @config.verbose
+      message.chomp!
+      @traffic_logger.info("<< #{message}") if @traffic_logger
+      puts "#{Time.now.strftime('%d.%m.%Y %H:%M:%S')} << #{message}" if @config.verbose
       
-      case message.chomp
+      case message
       when /^PING \S+$/
-        raw message.chomp.sub(/PING/, 'PONG')
+        raw message.sub(/PING/, 'PONG')
       
       when /^:\S+ (\d\d\d) /
         parse_type($1, :type => $1.to_sym, :params => $')
@@ -135,7 +136,7 @@ module Ponder
       end
       
       if @observers > 0
-        @temp_socket << message.chomp
+        @temp_socket << message
       end
     end
     
