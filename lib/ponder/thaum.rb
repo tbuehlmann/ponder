@@ -34,6 +34,20 @@ module Ponder
       
       # observer synchronizer
       @mutex_observer = Mutex.new
+      
+      # standard callbacks for PING, VERSION and TIME
+      on :query, /^\001PING \d+\001$/ do |env|
+        time = env[:message].scan(/\d+/)[0]
+        notice env[:nick], "\001PING #{time}\001"
+      end
+      
+      on :query, /^\001VERSION\001$/ do |env|
+        notice env[:nick], "\001VERSION Ponder #{Ponder::VERSION} (http://github.com/tbuehlmann/ponder)\001"
+      end
+      
+      on :query, /^\001TIME\001$/ do |env|
+        notice env[:nick], "\001TIME #{Time.now.strftime('%a %b %d %H:%M:%S %Y')}\001"
+      end
     end
     
     def configure(&block)
@@ -146,32 +160,12 @@ module Ponder
     
     # parses incoming traffic (types)
     def parse_type(type, env = {})
-      case type
-      # :connect
-      when /^376|422$/
-        unless @connected
-          @connected = true
-          call_callbacks(:connect, env)
-        end
-      when :query
-        # version response
-        if env[:message] == "\001VERSION\001"
-          notice env[:nick], "\001VERSION #{VERSION}\001"
-        end
-        
-        # time response
-        if env[:message] == "\001TIME\001"
-          notice env[:nick], "\001TIME #{Time.now.strftime('%a %b %d %H:%M:%S %Y')}\001"
-        end
-        
-        # ping response
-        if env[:message] =~ /\001PING (\d+)\001/
-          notice env[:nick], "\001PING #{$1}\001"
-        end
-        call_callbacks(type, env)
-      else
-        call_callbacks(type, env)
+      if type =~ /^376|422$/ && !@connected
+        @connected = true
+        call_callbacks(:connect, env)
       end
+      
+      call_callbacks(type, env)
     end
     
     # calls callbacks with its begin; rescue; end
