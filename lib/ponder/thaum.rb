@@ -56,8 +56,8 @@ module Ponder
         
         # logger
         if @config.logging
-          @traffic_logger = TwoFlogger.new(PONDER_ROOT.join('logs').expand_path, 'traffic.log')
-          @error_logger   = TwoFlogger.new(PONDER_ROOT.join('logs').expand_path, 'error.log')
+          @traffic_logger = TwoFlogger.new(Ponder.root.join('logs').expand_path, 'traffic.log')
+          @error_logger   = TwoFlogger.new(Ponder.root.join('logs').expand_path, 'error.log')
         end
       end
     end
