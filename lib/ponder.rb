@@ -1,4 +1,8 @@
 require 'pathname'
+require 'rubygems'
+require 'bundler'
+Bundler.setup
+
 $LOAD_PATH.unshift Pathname(__FILE__).dirname.expand_path
 
 Object::const_set(:PONDER_ROOT, Pathname($0).dirname.expand_path)
