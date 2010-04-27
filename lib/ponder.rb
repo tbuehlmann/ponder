@@ -13,4 +13,8 @@ module Ponder
   require 'ponder/version'
   require 'ponder/thaum'
   require 'ponder/formatting'
+  
+  if RUBY_VERSION < '1.9'
+    require 'ruby/1.8/string'
+  end
 end
