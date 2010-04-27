@@ -1,8 +1,4 @@
-begin
-  require 'eventmachine'
-rescue LoadError
-  retry if require 'rubygems'
-end
+require 'eventmachine'
 
 module Ponder
   class Connection < EventMachine::Connection
