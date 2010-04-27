@@ -2,33 +2,54 @@ module Ponder
   class Callback
     LISTENED_TYPES = [:connect, :channel, :query, :join, :part, :quit, :nickchange, :kick] # + 3-digit numbers
     
-    attr_reader :type
+    attr_reader :event_type
     
-    def initialize(type = :channel, match = //, proc = Proc.new {})
-      if (type.is_a?(Symbol) || type.is_a?(String))
-        @type = type.to_sym
-        
-        unless (LISTENED_TYPES.include?(@type) || @type =~ /^\d\d\d$/)
-          raise TypeError, "#{@type} is an unsupported type"
-        end
+    def initialize(target = nil, event_type = :channel, match = //, proc = Proc.new {})
+      self.target = target
+      self.event_type = event_type
+      self.match = match
+      self.proc = proc
+    end
+    
+    def call(event_type, event_data = {})
+      if (event_type == :channel) || (event_type == :query)
+        @proc.call(event_data) if event_data[:message] =~ @match
       else
-        raise TypeError, "#{type} must be a String, Symbol or 3-digit number"
+        @proc.call(event_data)
       end
-      
+    end
+    
+    private
+    
+    def target=(target)
+      unless target.nil?
+        @target = target
+      else
+        raise ArgumentError, "target must not be nil"
+      end
+    end
+    
+    def event_type=(event_type)
+      if LISTENED_TYPES.include?(event_type) || event_type.is_a?(Integer)
+        @event_type = event_type
+      else
+        raise TypeError, "#{type} is an unsupported event-type"
+      end
+    end
+    
+    def match=(match)
       if match.is_a?(Regexp)
         @match = match
       else
         raise TypeError, "#{match} must be a Regexp"
       end
-      
-      @proc = proc
     end
     
-    def call(type, env)
-      if (type == :channel) || (type == :query)
-          @proc.call(env) if env[:message] =~ @match
+    def proc=(proc)
+      if proc.is_a?(Proc)
+        @proc = proc
       else
-        @proc.call(env)
+        raise TypeError, "#{proc} must be a Proc"
       end
     end
   end

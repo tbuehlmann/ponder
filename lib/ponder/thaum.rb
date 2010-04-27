@@ -62,15 +62,15 @@ module Ponder
       end
     end
     
-    def on(type = [:channel], match = //, &block)
-      if type.is_a?(Array)
-        callbacks = type.map { |t| Callback.new(t, match, block) }
+    def on(event_types = [:channel], match = //, &block)
+      if event_types.is_a?(Array)
+        callbacks = event_types.map { |event_type| Callback.new(self, event_type, match, block) }
       else
-        callbacks = [Callback.new(type, match, block)]
+        callbacks = [Callback.new(self, event_types, match, block)]
       end
       
       callbacks.each do |callback|
-        @callbacks[callback.type] << callback
+        @callbacks[callback.event_type] << callback
       end
     end
     
@@ -111,28 +111,29 @@ module Ponder
         raw message.sub(/PING/, 'PONG')
       
       when /^:\S+ (\d\d\d) /
-        parse_type($1, :type => $1.to_sym, :params => $')
+        number = $1.to_i
+        parse_event(number, :type => number, :params => $')
       
       when /^:(\S+)!(\S+)@(\S+) PRIVMSG #(\S+) :/
-        parse_type(:channel, :type => :channel, :nick => $1, :user => $2, :host => $3, :channel => "##{$4}", :message => $')
+        parse_event(:channel, :type => :channel, :nick => $1, :user => $2, :host => $3, :channel => "##{$4}", :message => $')
       
       when /^:(\S+)!(\S+)@(\S+) PRIVMSG \S+ :/
-        parse_type(:query, :type => :query, :nick => $1, :user => $2, :host => $3, :message => $')
+        parse_event(:query, :type => :query, :nick => $1, :user => $2, :host => $3, :message => $')
       
       when /^:(\S+)!(\S+)@(\S+) JOIN :*(\S+)$/
-        parse_type(:join, :type => :join, :nick => $1, :user => $2, :host => $3, :channel => $4)
+        parse_event(:join, :type => :join, :nick => $1, :user => $2, :host => $3, :channel => $4)
       
       when /^:(\S+)!(\S+)@(\S+) PART (\S+)/
-        parse_type(:part, :type => :part, :nick => $1, :user => $2, :host => $3, :channel => $4, :message => $'.sub(' :', ''))
+        parse_event(:part, :type => :part, :nick => $1, :user => $2, :host => $3, :channel => $4, :message => $'.sub(' :', ''))
       
       when /^:(\S+)!(\S+)@(\S+) QUIT/
-        parse_type(:quit, :type => :quit, :nick => $1, :user => $2, :host => $3, :message => $'.sub(' :', ''))
+        parse_event(:quit, :type => :quit, :nick => $1, :user => $2, :host => $3, :message => $'.sub(' :', ''))
       
       when /^:(\S+)!(\S+)@(\S+) NICK :/
-        parse_type(:nickchange, :type => :nickchange, :nick => $1, :user => $2, :host => $3, :new_nick => $')
+        parse_event(:nickchange, :type => :nickchange, :nick => $1, :user => $2, :host => $3, :new_nick => $')
       
       when /^:(\S+)!(\S+)@(\S+) KICK (\S+) (\S+) :/
-        parse_type(:kick, :type => :kick, :nick => $1, :user => $2, :host => $3, :channel => $4, :victim => $5, :reason => $')
+        parse_event(:kick, :type => :kick, :nick => $1, :user => $2, :host => $3, :channel => $4, :victim => $5, :reason => $')
       end
       
       if @observers > 0
@@ -160,22 +161,22 @@ module Ponder
     end
     
     # parses incoming traffic (types)
-    def parse_type(type, env = {})
-      if type =~ /^376|422$/ && !@connected
+    def parse_event(event_type, event_data = {})
+      if ((event_type == 376) || (event_type == 422)) && !@connected
         @connected = true
-        call_callbacks(:connect, env)
+        process_callbacks(:connect, event_data)
       end
       
-      call_callbacks(type, env)
+      process_callbacks(event_type, event_data)
     end
     
-    # calls callbacks with its begin; rescue; end
-    def call_callbacks(type, env)
-      @callbacks[type].each do |callback|
+    # process callbacks with its begin; rescue; end
+    def process_callbacks(event_type, event_data)
+      @callbacks[event_type].each do |callback|
         EM.defer(
           Proc.new do
             begin
-              callback.call(type, env)
+              callback.call(event_type, event_data)
             rescue => e
               @error_logger.error(e.message, *e.backtrace) if @error_logger
             end
