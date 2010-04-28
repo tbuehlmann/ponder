@@ -4,8 +4,7 @@ module Ponder
     
     attr_reader :event_type
     
-    def initialize(target = nil, event_type = :channel, match = //, proc = Proc.new {})
-      self.target = target
+    def initialize(event_type = :channel, match = //, proc = Proc.new {})
       self.event_type = event_type
       self.match = match
       self.proc = proc
@@ -20,14 +19,6 @@ module Ponder
     end
     
     private
-    
-    def target=(target)
-      unless target.nil?
-        @target = target
-      else
-        raise ArgumentError, "target must not be nil"
-      end
-    end
     
     def event_type=(event_type)
       if LISTENED_TYPES.include?(event_type) || event_type.is_a?(Integer)

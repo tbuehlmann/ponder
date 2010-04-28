@@ -64,9 +64,9 @@ module Ponder
     
     def on(event_types = [:channel], match = //, &block)
       if event_types.is_a?(Array)
-        callbacks = event_types.map { |event_type| Callback.new(self, event_type, match, block) }
+        callbacks = event_types.map { |event_type| Callback.new(event_type, match, block) }
       else
-        callbacks = [Callback.new(self, event_types, match, block)]
+        callbacks = [Callback.new(event_types, match, block)]
       end
       
       callbacks.each do |callback|
