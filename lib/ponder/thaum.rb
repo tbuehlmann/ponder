@@ -6,7 +6,8 @@ require 'ostruct'
 
 module Ponder
   class Thaum
-    include Delegate, IRC
+    include IRC
+    include Delegate
     
     attr_reader :config
     attr_accessor :connected, :traffic_logger, :error_logger, :console_logger
