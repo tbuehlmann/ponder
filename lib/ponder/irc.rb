@@ -3,8 +3,8 @@ module Ponder
     # raw IRC messages
     def raw(message)
       @connection.send_data "#{message}\r\n"
-      @traffic_logger.info(">> #{message}") if @traffic_logger
-      puts "#{Time.now.strftime('%d.%m.%Y %H:%M:%S')} >> #{message}" if @config.verbose
+      @traffic_logger.info ">> #{message}"
+      @console_logger.info ">> #{message}"
     end
     
     # send a message

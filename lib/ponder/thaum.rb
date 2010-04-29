@@ -3,14 +3,13 @@ require 'ponder/connection'
 require 'ponder/irc'
 require 'ponder/delegate'
 require 'ostruct'
-Ponder.autoload :'TwoFlogger', 'ponder/two_flogger.rb'
 
 module Ponder
   class Thaum
     include Delegate, IRC
     
     attr_reader :config
-    attr_accessor :connected, :traffic_logger
+    attr_accessor :connected, :traffic_logger, :error_logger, :console_logger
     
     def initialize
       @config = OpenStruct.new(:server             => 'localhost',
@@ -22,6 +21,11 @@ module Ponder
                                :reconnect          => true,
                                :reconnect_interval => 30
                               )
+      
+      @empty_logger   = Logger::BlindIo.new
+      @traffic_logger = @empty_logger
+      @error_logger   = @empty_logger
+      @console_logger = Logger::Twoflogger.new($stdout)
       
       @observers = 0
       @temp_socket = []
@@ -54,10 +58,14 @@ module Ponder
       unless @reloading
         block.call(@config)
         
-        # logger
+        # logger changes (if differing from initialize)
         if @config.logging
-          @traffic_logger = TwoFlogger.new(Ponder.root.join('logs').expand_path, 'traffic.log')
-          @error_logger   = TwoFlogger.new(Ponder.root.join('logs').expand_path, 'error.log')
+          @traffic_logger = @config.traffic_logger ? @config.traffic_logger : Logger::Twoflogger.new(Ponder.root.join('logs', 'traffic.log'))
+          @error_logger = @config.error_logger ? @config.error_logger : Logger::Twoflogger.new(Ponder.root.join('logs', 'error.log'))
+        end
+        
+        unless @config.verbose
+          @console_logger = @empty_logger
         end
       end
     end
@@ -76,8 +84,12 @@ module Ponder
     
     def connect(run = true)
       unless @reloading
-        @traffic_logger.info('-- Starting Ponder') if @traffic_logger
-        puts "#{Time.now.strftime('%d.%m.%Y %H:%M:%S')} -- Starting Ponder"
+        @traffic_logger.start_logging
+        @error_logger.start_logging
+        @console_logger.start_logging
+        
+        @traffic_logger.info '-- Starting Ponder'
+        @console_logger.info '-- Starting Ponder'
         
         if run
           EventMachine::run do
@@ -103,8 +115,8 @@ module Ponder
     # parsing incoming traffic
     def parse(message)
       message.chomp!
-      @traffic_logger.info("<< #{message}") if @traffic_logger
-      puts "#{Time.now.strftime('%d.%m.%Y %H:%M:%S')} << #{message}" if @config.verbose
+      @traffic_logger.info "<< #{message}"
+      @console_logger.info "<< #{message}"
       
       case message
       when /^PING \S+$/
@@ -178,7 +190,8 @@ module Ponder
             begin
               callback.call(event_type, event_data)
             rescue => e
-              @error_logger.error(e.message, *e.backtrace) if @error_logger
+              @error_logger.error(e.message, *e.backtrace)
+              @console_logger.error(e.message, *e.backtrace)
             end
           end
         )

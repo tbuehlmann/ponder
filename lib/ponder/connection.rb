@@ -14,12 +14,12 @@ module Ponder
     
     def unbind
       @thaum.connected = false
-      @thaum.traffic_logger.info('-- Ponder disconnected') if @thaum.traffic_logger
-      puts "#{Time.now.strftime('%d.%m.%Y %H:%M:%S')} -- Ponder disconnected"
+      @thaum.traffic_logger.info '-- Ponder disconnected'
+      @thaum.console_logger.info '-- Ponder disconnected'
       
       if @thaum.config.reconnect
-        @thaum.traffic_logger.info("-- Reconnecting in #{@thaum.config.reconnect_interval} seconds") if @thaum.traffic_logger
-        puts "#{Time.now.strftime('%d.%m.%Y %H:%M:%S')} -- Reconnecting in #{@thaum.config.reconnect_interval} seconds"
+        @thaum.traffic_logger.info "-- Reconnecting in #{@thaum.config.reconnect_interval} seconds"
+        @thaum.console_logger.info "-- Reconnecting in #{@thaum.config.reconnect_interval} seconds"
         
         EventMachine::add_timer(@thaum.config.reconnect_interval) do
           reconnect @thaum.config.server, @thaum.config.port
