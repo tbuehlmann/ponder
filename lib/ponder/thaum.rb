@@ -147,6 +147,9 @@ module Ponder
       
       when /^:(\S+)!(\S+)@(\S+) KICK (\S+) (\S+) :/
         parse_event(:kick, :type => :kick, :nick => $1, :user => $2, :host => $3, :channel => $4, :victim => $5, :reason => $')
+      
+      when /^:(\S+)!(\S+)@(\S+) TOPIC (\S+) :/
+        parse_event(:topic, :type => :topic, :nick => $1, :user => $2, :host => $3, :channel => $4, :topic => $')
       end
       
       if @observers > 0

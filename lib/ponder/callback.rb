@@ -1,6 +1,6 @@
 module Ponder
   class Callback
-    LISTENED_TYPES = [:connect, :channel, :query, :join, :part, :quit, :nickchange, :kick] # + 3-digit numbers
+    LISTENED_TYPES = [:connect, :channel, :query, :join, :part, :quit, :nickchange, :kick, :topic] # + 3-digit numbers
     
     attr_reader :event_type
     
@@ -13,6 +13,8 @@ module Ponder
     def call(event_type, event_data = {})
       if (event_type == :channel) || (event_type == :query)
         @proc.call(event_data) if event_data[:message] =~ @match
+      elsif event_type == :topic
+        @proc.call(event_data) if event_data[:topic] =~ @match
       else
         @proc.call(event_data)
       end
