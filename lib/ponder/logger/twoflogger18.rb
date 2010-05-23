@@ -82,7 +82,7 @@ module Ponder
       def write(*message_hashes)
         begin
           message_hashes.each do |hash|
-            @log_dev.puts "#{@levels.key(hash[:severity])} #{Time.now.strftime(@time_format)} #{hash[:message]}"
+            @log_dev.puts "#{@levels.index(hash[:severity])} #{Time.now.strftime(@time_format)} #{hash[:message]}"
           end
         rescue => e
           puts e.message, *e.backtrace
