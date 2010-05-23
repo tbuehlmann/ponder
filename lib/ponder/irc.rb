@@ -75,5 +75,9 @@ module Ponder
       
       @config.reconnect = false # so Ponder does not reconnect after the socket has been closed
     end
+    
+    def rename(nick)
+      raw "NICK :#{nick}"
+    end
   end
 end
