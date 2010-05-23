@@ -1,6 +1,6 @@
 module Ponder
   module Delegate
-    def delegate!
+    def delegate
       thaum = self
       
       (IRC.instance_methods + [:configure, :on, :connect, :reload!, :reloading?]).each do |method| # methods.each do |method|

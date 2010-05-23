@@ -1,13 +1,15 @@
 require 'ponder/callback'
 require 'ponder/connection'
 require 'ponder/irc'
-require 'ponder/delegate'
 require 'ostruct'
 
 module Ponder
   class Thaum
     include IRC
-    include Delegate
+    if RUBY_VERSION >= '1.9'
+      require 'ponder/delegate'
+      include Delegate
+    end
     
     attr_reader :config
     attr_accessor :connected, :traffic_logger, :error_logger, :console_logger
