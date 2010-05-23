@@ -1,7 +1,5 @@
 require 'pathname'
 require 'rubygems'
-require 'bundler'
-Bundler.setup
 
 $LOAD_PATH.unshift Pathname.new(__FILE__).dirname.expand_path
 
