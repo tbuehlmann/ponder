@@ -79,5 +79,17 @@ module Ponder
     def rename(nick)
       raw "NICK :#{nick}"
     end
+    
+    def away(message = nil)
+      if message
+        raw "AWAY :#{message}"
+      else
+        raw "AWAY"
+      end
+    end
+    
+    def back
+      away
+    end
   end
 end
