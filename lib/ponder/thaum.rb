@@ -23,7 +23,8 @@ module Ponder
                                :verbose            => true,
                                :logging            => false,
                                :reconnect          => true,
-                               :reconnect_interval => 30
+                               :reconnect_interval => 30,
+                               :auto_rename        => true
                               )
       
       @empty_logger   = Logger::BlindIo.new
@@ -43,7 +44,7 @@ module Ponder
       # observer synchronizer
       @mutex_observer = Mutex.new
       
-      # standard callbacks for PING, VERSION and TIME
+      # standard callbacks for PING, VERSION, TIME and Nickname is already in use
       on :query, /^\001PING \d+\001$/ do |env|
         time = env[:message].scan(/\d+/)[0]
         notice env[:nick], "\001PING #{time}\001"
@@ -55,6 +56,10 @@ module Ponder
       
       on :query, /^\001TIME\001$/ do |env|
         notice env[:nick], "\001TIME #{Time.now.strftime('%a %b %d %H:%M:%S %Y')}\001"
+      end
+      
+      on 433 do
+        rename "#{@config.nick}#{rand(10)}#{rand(10)}#{rand(10)}"
       end
     end
     
@@ -70,6 +75,11 @@ module Ponder
         
         unless @config.verbose
           @console_logger = @empty_logger
+        end
+        
+        # remove auto_rename callback (if differing from initialize)
+        unless @config.auto_rename
+          @callbacks.delete(433)
         end
       end
     end
