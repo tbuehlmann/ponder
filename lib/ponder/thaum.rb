@@ -12,7 +12,7 @@ module Ponder
     end
     
     attr_reader :config
-    attr_accessor :connected, :traffic_logger, :error_logger, :console_logger
+    attr_accessor :connected, :traffic_logger, :error_logger, :console_logger, :empty_logger
     
     def initialize
       @config = OpenStruct.new(:server             => 'localhost',
