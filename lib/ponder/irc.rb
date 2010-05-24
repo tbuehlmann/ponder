@@ -12,9 +12,10 @@ module Ponder
       raw "PRIVMSG #{recipient} :#{message}"
     end
     
+    # register when connected
     def register
       raw "NICK #{@config.nick}"
-      raw "USER #{@config.nick} 0 * :#{@config.realname}"
+      raw "USER #{@config.username} * * :#{@config.real_name}"
       raw "PASS #{@config.password}" if @config.password
     end
     
