@@ -1,11 +1,14 @@
 require 'ponder/callback'
 require 'ponder/connection'
 require 'ponder/irc'
+require 'ponder/async_irc'
 require 'ostruct'
 
 module Ponder
   class Thaum
     include IRC
+    include AsyncIRC
+    
     if RUBY_VERSION >= '1.9'
       require 'ponder/delegate'
       include Delegate
@@ -32,17 +35,13 @@ module Ponder
       @error_logger   = @empty_logger
       @console_logger = Logger::Twoflogger.new($stdout)
       
-      @observers = 0
-      @temp_socket = []
+      @observer_queues = {}
       
       @connected = false
       @reloading = false
       
       # user callbacks
-      @callbacks = Hash.new { |hash, key| hash[key] = [] } ## old: Hash.new []
-      
-      # observer synchronizer
-      @mutex_observer = Mutex.new
+      @callbacks = Hash.new { |hash, key| hash[key] = [] }
       
       # standard callbacks for PING, VERSION, TIME and Nickname is already in use
       on :query, /^\001PING \d+\001$/ do |env|
@@ -165,29 +164,16 @@ module Ponder
         parse_event(:topic, :type => :topic, :nick => $1, :user => $2, :host => $3, :channel => $4, :topic => $')
       end
       
-      if @observers > 0
-        @temp_socket << message
+      @observer_queues.each do |queue, regexps|
+        regexps.each do |regexp|
+          if message =~ regexp
+            queue << message
+          end
+        end
       end
     end
     
     private
-    
-    # add observer
-    def add_observer
-      @mutex_observer.synchronize do
-        @observers += 1
-      end
-      
-      return @temp_socket.length - 1 # so the loop knows where to begin to search for patterns
-    end
-    
-    # remove observer
-    def remove_observer
-      @mutex_observer.synchronize do
-        @observers -= 1 # remove observer
-        @temp_socket.clear if @observers == 0 # clear @temp_socket if no observers are active
-      end
-    end
     
     # parses incoming traffic (types)
     def parse_event(event_type, event_data = {})
