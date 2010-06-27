@@ -67,29 +67,56 @@ module Ponder
       return information
     end
     
-    def is_online(nick)
+    def whois(nick)
       queue = Queue.new
-      @observer_queues[queue] = [/:\S+ (311|401) \S+ #{Regexp.escape(nick)}/i]
+      @observer_queues[queue] = [/^:\S+ (307|311|312|318|319|401) \S+ #{Regexp.escape(nick)}/i]
       raw "WHOIS #{nick}"
+      whois = {}
+      running = true
       
-      topic = begin
-        Timeout::timeout(30) do
-           response = queue.pop
-           raw_numeric = response.scan(/^:\S+ (\d{3})/)[0][0]
-           
-           case raw_numeric
-           when '311'
-             response.scan(/^:\S+ 311 \S+ (\S+)/)[0][0]
-           when '401'
-             false
-           end
+      while running
+        begin
+          Timeout::timeout(30) do
+             response = queue.pop
+             raw_numeric = response.scan(/^:\S+ (\d{3})/)[0][0]
+             
+             case raw_numeric
+             when '307'
+               whois[:registered] = true
+             when '311'
+               response = response.scan(/^:\S+ 311 \S+ (\S+) (\S+) (\S+) \* :(.*)$/)[0]
+               whois[:nick]      = response[0]
+               whois[:username]  = response[1]
+               whois[:host]      = response[2]
+               whois[:real_name] = response[3]
+             when '312'
+               response = response.scan(/^:\S+ 312 \S+ \S+ (\S+) :(.*)/)[0]
+               whois[:server] = {:address => response[0], :name => response[1]}
+             when '318'
+               running = false
+             when '319'
+               channels_with_mode = response.scan(/^:\S+ 319 \S+ \S+ :(.*)/)[0][0].split(' ')
+               whois[:channels] = channels_with_mode.map { |c| {:mode => c.scan(/(.)?(#\S+)/)[0][0], :channel => c.scan(/(.)?(#\S+)/)[0][1]} }
+             when '401'
+               whois  = false
+               running = false
+             end
+          end
+        rescue Timeout::Error
+          nil
         end
-      rescue Timeout::Error
-        nil
       end
       
       @observer_queues.delete queue
-      return topic
+      return whois
     end
   end
 end
+
+
+
+
+
+
+
+
