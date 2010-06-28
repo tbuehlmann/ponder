@@ -26,7 +26,7 @@ module Ponder
       if LISTENED_TYPES.include?(event_type) || event_type.is_a?(Integer)
         @event_type = event_type
       else
-        raise TypeError, "#{type} is an unsupported event-type"
+        raise TypeError, "#{event_type} is an unsupported event-type"
       end
     end
     
