@@ -1,12 +1,11 @@
 require 'pathname'
 $LOAD_PATH.unshift Pathname.new(__FILE__).dirname.expand_path
 require 'test_helper'
-
 require 'ponder/callback'
 
 module Ponder
   class Callback
-    attr_accessor :type, :match, :proc
+    attr_reader :event_type, :match, :proc
   end
 end
 
@@ -18,30 +17,30 @@ class TestCallback < Test::Unit::TestCase
   def test_perfect_case
     callback = Ponder::Callback.new(:channel, /foo/, @empty_proc)
     
-    assert_equal(:channel, callback.type)
+    assert_equal(:channel, callback.event_type)
     assert_equal(/foo/, callback.match)
     assert_equal(@empty_proc, callback.proc)
   end
   
-  def test_wrong_type
+  def test_unsupported_event_type
     assert_raise(TypeError) do
-      Ponder::Callback.new(8, /foo/, @empty_proc)
+      Ponder::Callback.new('fu', /foo/, @empty_proc)
     end
   end
   
-  def test_unsupported_type
-    assert_raise(TypeError) do
-      Ponder::Callback.new(:DEATH, /foo/, @empty_proc)
-    end
-  end
-  
-  def test_wrong_regexp
+  def test_regexp
     assert_raise(TypeError) do
       Ponder::Callback.new(:channel, 8, @empty_proc)
     end
   end
   
   def test_proc
+    assert_raise(TypeError) do
+      Ponder::Callback.new(:channel, /foo/, 8)
+    end
+  end
+  
+  def test__trivial_proc
     proc = Proc.new { 7 + 1 }
     
     assert_equal(proc, Ponder::Callback.new(:channel, //, proc).proc)

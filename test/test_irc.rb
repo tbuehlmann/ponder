@@ -1,9 +1,9 @@
 require 'pathname'
 $LOAD_PATH.unshift Pathname.new(__FILE__).dirname.expand_path
 require 'test_helper'
-
 require 'ponder/irc'
 require 'ostruct'
+
 include Ponder::IRC
 
 module Ponder
@@ -17,29 +17,30 @@ end
 
 class TestIRC < Test::Unit::TestCase
   def setup
-    @config = ::OpenStruct.new({:nick    => 'Ponder',
-                              :realname  => 'Ponder Stibbons',
-                              :password  => 'secret',
-                              :reconnect => true
-                             })
+    @config = ::OpenStruct.new({:nick      => 'Ponder',
+                                :username  => 'Ponder',
+                                :real_name => 'Ponder Stibbons',
+                                :password  => 'secret',
+                                :reconnect => true
+                              })
     $output = []
   end
   
   def test_message
-    assert_equal("PRIVMSG recipient :foo\r\n", Ponder::IRC.message('recipient', 'foo')) # `message` is already defined, so we need to use Ponder::IRC
+    assert_equal("PRIVMSG recipient :foo bar baz\r\n", Ponder::IRC.message('recipient', 'foo bar baz')) # `message` is already defined, so we need to use Ponder::IRC
   end
   
   def test_register
     register
     
-    assert_equal(["NICK Ponder\r\n", "USER Ponder 0 * :Ponder Stibbons\r\n", "PASS secret\r\n"], $output)
+    assert_equal(["NICK Ponder\r\n", "USER Ponder * * :Ponder Stibbons\r\n", "PASS secret\r\n"], $output)
   end
   
   def test_register_without_password
     @config.password = nil
     register
     
-    assert_equal(["NICK Ponder\r\n", "USER Ponder 0 * :Ponder Stibbons\r\n"], $output)
+    assert_equal(["NICK Ponder\r\n", "USER Ponder * * :Ponder Stibbons\r\n"], $output)
   end
   
   def test_notice
@@ -50,7 +51,7 @@ class TestIRC < Test::Unit::TestCase
     assert_equal("MODE Ponder +ao\r\n", mode('Ponder', '+ao'))
   end
   
-  def test_kick_without_reason
+  def test_kick
     assert_equal("KICK #channel Nanny_Ogg\r\n", kick('#channel', 'Nanny_Ogg'))
   end
   
@@ -66,7 +67,7 @@ class TestIRC < Test::Unit::TestCase
     assert_equal("TOPIC #channel :I like dried frog pills.\r\n", topic('#channel', 'I like dried frog pills.'))
   end
   
-  def test_join_without_password
+  def test_join
     assert_equal("JOIN #channel\r\n", join('#channel'))
   end
   
@@ -74,7 +75,7 @@ class TestIRC < Test::Unit::TestCase
     assert_equal("JOIN #channel secret\r\n", join('#channel', 'secret'))
   end
   
-  def test_part_without_message
+  def test_part
     assert_equal("PART #channel\r\n", part('#channel'))
   end
   
@@ -82,7 +83,7 @@ class TestIRC < Test::Unit::TestCase
     assert_equal("PART #channel :Partpart\r\n", part('#channel', 'Partpart'))
   end
   
-  def test_quit_without_message
+  def test_quit
     quit
     
     assert_equal(["QUIT\r\n"], $output)
@@ -101,4 +102,21 @@ class TestIRC < Test::Unit::TestCase
     
     assert_equal(false, @config.reconnect)
   end
+  
+  def test_rename
+    assert_equal("NICK :Ridcully\r\n", rename('Ridcully'))
+  end
+  
+  def test_away
+    assert_equal("AWAY\r\n", away)
+  end
+  
+  def test_away_with_message
+    assert_equal("AWAY :At the Mended Drum\r\n", away('At the Mended Drum'))
+  end
+  
+  def test_back
+    assert_equal("AWAY\r\n", back)
+  end
 end
+
