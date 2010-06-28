@@ -17,7 +17,7 @@ module Ponder
            when '331'
              {:raw_numeric => 331, :message => 'No topic is set'}
            when '332'
-             {:raw_numeric => 332, :message => response.scan(/^ :(.*)/)[0][0]}
+             {:raw_numeric => 332, :message => response.scan(/ :(.*)/)[0][0]}
            when '403'
              {:raw_numeric => 403, :message => 'No such channel'}
            when '442'
