@@ -77,10 +77,12 @@ module Ponder
       @config.reconnect = false # so Ponder does not reconnect after the socket has been closed
     end
     
+    # rename
     def rename(nick)
       raw "NICK :#{nick}"
     end
     
+    # set an away status
     def away(message = nil)
       if message
         raw "AWAY :#{message}"
@@ -89,8 +91,10 @@ module Ponder
       end
     end
     
+    # cancel an away status
     def back
       away
     end
   end
 end
+
