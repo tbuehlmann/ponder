@@ -95,6 +95,11 @@ module Ponder
     def back
       away
     end
+    
+    # invite an user to a channel
+    def invite(nick, channel)
+      raw "INVITE #{nick} #{channel}"
+    end
   end
 end
 

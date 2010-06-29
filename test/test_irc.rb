@@ -118,5 +118,9 @@ class TestIRC < Test::Unit::TestCase
   def test_back
     assert_equal("AWAY\r\n", back)
   end
+  
+  def test_invite
+    assert_equal("INVITE TheLibrarian #mended_drum\r\n", invite('TheLibrarian', '#mended_drum'))
+  end
 end
 
