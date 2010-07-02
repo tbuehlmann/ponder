@@ -149,10 +149,10 @@ module Ponder
         parse_event(:join, :type => :join, :nick => $1, :user => $2, :host => $3, :channel => $4)
       
       when /^:(\S+)!(\S+)@(\S+) PART (\S+)/
-        parse_event(:part, :type => :part, :nick => $1, :user => $2, :host => $3, :channel => $4, :message => $'.sub(' :', ''))
+        parse_event(:part, :type => :part, :nick => $1, :user => $2, :host => $3, :channel => $4, :message => $'.sub(/ :/, ''))
       
       when /^:(\S+)!(\S+)@(\S+) QUIT/
-        parse_event(:quit, :type => :quit, :nick => $1, :user => $2, :host => $3, :message => $'.sub(' :', ''))
+        parse_event(:quit, :type => :quit, :nick => $1, :user => $2, :host => $3, :message => $'.sub(/ :/, ''))
       
       when /^:(\S+)!(\S+)@(\S+) NICK :/
         parse_event(:nickchange, :type => :nickchange, :nick => $1, :user => $2, :host => $3, :new_nick => $')
