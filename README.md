@@ -7,7 +7,7 @@ Ponder (Stibbons) is a Domain Specific Language for writing IRC Bots using the [
 ### Installation
     $ sudo gem install ponder
 
-### Configuring the <strike>Bot</strike> Thaum
+### Configuring the Bot (Thaum!)
     require 'rubygems'
     require 'ponder'
     
