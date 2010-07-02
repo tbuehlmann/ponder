@@ -241,7 +241,7 @@ Last but not least some cool "give me something back" methods:
     Example:
     
         # Ponder, kick an user (and check if I'm allowed to command you)!
-        @ponder.on :message, /^!kick \S+$/ do |event_data|
+        @ponder.on :channel, /^!kick \S+$/ do |event_data|
           user_data = @ponder.whois(event_data[:nick])
           if user_data[:registered] && (user_data[:channels][event_data[:channel]] == '@')
             user_to_kick = event_data[:message].split(' ')[1]
