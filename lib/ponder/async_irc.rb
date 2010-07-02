@@ -96,7 +96,10 @@ module Ponder
                running = false
              when '319'
                channels_with_mode = response.scan(/^:\S+ 319 \S+ \S+ :(.*)/)[0][0].split(' ')
-               whois[:channels] = channels_with_mode.map { |c| {:mode => c.scan(/(.)?(#\S+)/)[0][0], :channel => c.scan(/(.)?(#\S+)/)[0][1]} }
+               whois[:channels] = {}
+               channels_with_mode.each do |c|
+                 whois[:channels][c.scan(/(.)?(#\S+)/)[0][1]] = c.scan(/(.)?(#\S+)/)[0][0]
+               end
              when '401'
                whois  = false
                running = false
@@ -112,11 +115,3 @@ module Ponder
     end
   end
 end
-
-
-
-
-
-
-
-
