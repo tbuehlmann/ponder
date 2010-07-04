@@ -173,18 +173,6 @@ module Ponder
       end
     end
     
-    private
-    
-    # parses incoming traffic (types)
-    def parse_event(event_type, event_data = {})
-      if ((event_type == 376) || (event_type == 422)) && !@connected
-        @connected = true
-        process_callbacks(:connect, event_data)
-      end
-      
-      process_callbacks(event_type, event_data)
-    end
-    
     # process callbacks with its begin; rescue; end
     def process_callbacks(event_type, event_data)
       @callbacks[event_type].each do |callback|
@@ -199,6 +187,18 @@ module Ponder
           end
         )
       end
+    end
+    
+    private
+    
+    # parses incoming traffic (types)
+    def parse_event(event_type, event_data = {})
+      if ((event_type == 376) || (event_type == 422)) && !@connected
+        @connected = true
+        process_callbacks(:connect, event_data)
+      end
+      
+      process_callbacks(event_type, event_data)
     end
   end
 end

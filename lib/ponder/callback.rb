@@ -1,6 +1,6 @@
 module Ponder
   class Callback
-    LISTENED_TYPES = [:connect, :channel, :query, :join, :part, :quit, :nickchange, :kick, :topic] # + 3-digit numbers
+    LISTENED_TYPES = [:connect, :channel, :query, :join, :part, :quit, :nickchange, :kick, :topic, :disconnect] # + 3-digit numbers
     
     attr_reader :event_type
     

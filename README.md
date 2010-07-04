@@ -149,6 +149,10 @@ A Thaum can react on several events, so here is a list of handlers that can be u
     
     This will just work for topics that include the word "foo".
 
+* `disconnect`
+
+    `disconnect` reacts on being disconnected from the server (netsplit, quit, ...). It does not react if you exit the program with ^C.
+
 * Raw numerics
 
     A Thaum can seperately react on events with raw numerics, too. So you could do:

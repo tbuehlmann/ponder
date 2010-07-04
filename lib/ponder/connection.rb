@@ -14,6 +14,7 @@ module Ponder
     
     def unbind
       @thaum.connected = false
+      @thaum.process_callbacks :disconnect
       @thaum.traffic_logger.info '-- Ponder disconnected'
       @thaum.console_logger.info '-- Ponder disconnected'
       
