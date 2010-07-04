@@ -141,7 +141,13 @@ A Thaum can react on several events, so here is a list of handlers that can be u
 
 * `topic`
 
-    `topic` is for reacting on topic changes. Data hash keys are: `:nick`, `:user`, `:host`, `:channel` and `:topic`, where `:topic` is the new topic.
+    `topic` is for reacting on topic changes. Data hash keys are: `:nick`, `:user`, `:host`, `:channel` and `:topic`, where `:topic` is the new topic. You can provide a Regexp to just react on specific patterns:
+    
+        @ponder.on :topic, /foo/ do |event_data|
+          # ...
+        end
+    
+    This will just work for topics that include the word "foo".
 
 * Raw numerics
 
