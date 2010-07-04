@@ -5,7 +5,10 @@ module Ponder
     attr_reader :event_type
     
     def initialize(event_type = :channel, match = //, proc = Proc.new {})
-      self.event_type = event_type
+      unless self.class::LISTENED_TYPES.include?(event_type) || event_type.is_a?(Integer)
+        raise TypeError, "#{event_type} is an unsupported event-type"
+      end
+      
       self.match = match
       self.proc = proc
     end
@@ -21,14 +24,6 @@ module Ponder
     end
     
     private
-    
-    def event_type=(event_type)
-      if LISTENED_TYPES.include?(event_type) || event_type.is_a?(Integer)
-        @event_type = event_type
-      else
-        raise TypeError, "#{event_type} is an unsupported event-type"
-      end
-    end
     
     def match=(match)
       if match.is_a?(Regexp)
