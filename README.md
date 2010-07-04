@@ -267,7 +267,7 @@ You can have Before Filters! They are called before each event handling process 
       # ...
     end
 
-This Before Filter will be called, if a channel message with the word "foo" gets in. You can use all other event types (like :query, :kick, ...) as well. Also possible is an array notation like `before_filter([:query, :channel], /foo/) ...`. If you want the filter to work an all event types, you can simply use `:all`.
+This Before Filter will be called, if a channel message with the word "foo" gets in. You can use all other event types (like :query, :kick, ...) as well. Also possible is an array notation like `before_filter([:query, :channel], /foo/) ...`. If you want the filter to work an all event types, you can simply use `:all`. Filters will be called in defining order; first defined, first called. Event specific filters are called before `:all` filters.
 
 ### After Filters
 After Filters work the same way as Before Filters do, just after the actual event handling process. An After Filter does not hinder later After Filters to fire up if it returns `false`. Example:
