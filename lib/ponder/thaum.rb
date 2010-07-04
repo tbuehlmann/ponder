@@ -214,7 +214,7 @@ module Ponder
                   filter.call(event_type, event_data)
                 end
                 
-                # after (all)
+                # after (:all)
                 @after_filters[:all].each do |filter|
                   filter.call(event_type, event_data)
                 end
