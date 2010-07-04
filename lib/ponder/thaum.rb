@@ -2,6 +2,7 @@ require 'ponder/callback'
 require 'ponder/connection'
 require 'ponder/irc'
 require 'ponder/async_irc'
+require 'ponder/filter'
 require 'ostruct'
 
 module Ponder
@@ -60,6 +61,10 @@ module Ponder
       on 433 do
         rename "#{@config.nick}#{rand(10)}#{rand(10)}#{rand(10)}"
       end
+      
+      # before and after filter
+      @before_filters = Hash.new { |hash, key| hash[key] = [] }
+      @after_filters = Hash.new { |hash, key| hash[key] = [] }
     end
     
     def configure(&block)
@@ -88,10 +93,11 @@ module Ponder
         callbacks = event_types.map { |event_type| Callback.new(event_type, match, block) }
       else
         callbacks = [Callback.new(event_types, match, block)]
+        event_types = [event_types]
       end
       
-      callbacks.each do |callback|
-        @callbacks[callback.event_type] << callback
+      callbacks.each_with_index do |callback, index|
+        @callbacks[event_types[index]] << callback
       end
     end
     
@@ -179,7 +185,40 @@ module Ponder
         EM.defer(
           Proc.new do
             begin
-              callback.call(event_type, event_data)
+              stop_running = false
+              
+              # before (event_type)
+              @before_filters[event_type].each do |filter|
+                if filter.call(event_type, event_data) == false
+                  stop_running = true
+                  break
+                end
+              end
+              
+              # before (:all)
+              unless stop_running
+                @before_filters[:all].each do |filter|
+                  if filter.call(event_type, event_data) == false
+                    stop_running = true
+                    break
+                  end
+                end
+              end
+              
+              unless stop_running
+                # handling
+                callback.call(event_type, event_data)
+                
+                # after (event_type)
+                @after_filters[event_type].each do |filter|
+                  filter.call(event_type, event_data)
+                end
+                
+                # after (all)
+                @after_filters[:all].each do |filter|
+                  filter.call(event_type, event_data)
+                end
+              end
             rescue => e
               @error_logger.error(e.message, *e.backtrace)
               @console_logger.error(e.message, *e.backtrace)
@@ -187,6 +226,14 @@ module Ponder
           end
         )
       end
+    end
+    
+    def before_filter(event_types = :all, match = //, &block)
+      filter(@before_filters, event_types, match, block)
+    end
+    
+    def after_filter(event_types = :all, match = //, &block)
+      filter(@after_filters, event_types, match, block)
     end
     
     private
@@ -199,6 +246,16 @@ module Ponder
       end
       
       process_callbacks(event_type, event_data)
+    end
+    
+    def filter(filter_type, event_types = :all, match = //, block)
+      if event_types.is_a?(Array)
+        event_types.each do |event_type|
+          filter_type[event_type] << Filter.new(event_type, match, block)
+        end
+      elsif
+        filter_type[event_types] << Filter.new(event_types, match, block)
+      end
     end
   end
 end

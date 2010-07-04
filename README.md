@@ -259,6 +259,19 @@ Last but not least some cool "give me something back" methods:
           end
         end
 
+## Filters
+### Before Filters
+You can have Before Filters! They are called before each event handling process and can - among other things - manipulate the `event_data` hash. If a Before Filter returns `false`, no further filters (no After Filters either) are called and the event handling process won't fire up. Example:
+
+    @ponder.before_filter(:channel, /foo/) do
+      # ...
+    end
+
+This Before Filter will be called, if a channel message with the word "foo" gets in. You can use all other event types (like :query, :kick, ...) as well. Also possible is an array notation like `before_filter([:query, :channel], /foo/) ...`. If you want the filter to work an all event types, you can simply use `:all`.
+
+### After Filters
+After Filters work the same way as Before Filters do, just after the actual event handling process. An After Filter does not hinder later After Filters to fire up if it returns `false`.
+
 ## Source
 The source can be found at GitHub: [tbuehlmann/ponder](http://github.com/tbuehlmann/ponder "Ponder")
 
