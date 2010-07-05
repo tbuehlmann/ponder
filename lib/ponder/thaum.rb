@@ -101,7 +101,7 @@ module Ponder
       end
     end
     
-    def connect(run = true)
+    def connect
       unless @reloading
         @traffic_logger.start_logging
         @error_logger.start_logging
@@ -110,11 +110,7 @@ module Ponder
         @traffic_logger.info '-- Starting Ponder'
         @console_logger.info '-- Starting Ponder'
         
-        if run
-          EventMachine::run do
-            @connection = EventMachine::connect(@config.server, @config.port, Connection, self)
-          end
-        else
+        EventMachine::run do
           @connection = EventMachine::connect(@config.server, @config.port, Connection, self)
         end
       end
