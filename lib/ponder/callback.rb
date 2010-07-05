@@ -2,8 +2,6 @@ module Ponder
   class Callback
     LISTENED_TYPES = [:connect, :channel, :query, :join, :part, :quit, :nickchange, :kick, :topic, :disconnect] # + 3-digit numbers
     
-    attr_reader :event_type
-    
     def initialize(event_type = :channel, match = //, proc = Proc.new {})
       unless self.class::LISTENED_TYPES.include?(event_type) || event_type.is_a?(Integer)
         raise TypeError, "#{event_type} is an unsupported event-type"
