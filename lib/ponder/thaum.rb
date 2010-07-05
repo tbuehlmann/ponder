@@ -179,6 +179,7 @@ module Ponder
       end
     end
     
+    # process callbacks with its begin; rescue; end
     def process_callbacks(event_type, event_data)
       @callbacks[event_type].each do |callback|
         EM.defer(
