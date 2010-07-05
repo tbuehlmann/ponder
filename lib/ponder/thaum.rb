@@ -179,7 +179,6 @@ module Ponder
       end
     end
     
-    # process callbacks with its begin; rescue; end
     def process_callbacks(event_type, event_data)
       @callbacks[event_type].each do |callback|
         EM.defer(
@@ -187,21 +186,11 @@ module Ponder
             begin
               stop_running = false
               
-              # before (event_type)
-              @before_filters[event_type].each do |filter|
+              # before filters (specific filters first, then :all)
+              (@before_filters[event_type] + @before_filters[:all]).each do |filter|
                 if filter.call(event_type, event_data) == false
                   stop_running = true
                   break
-                end
-              end
-              
-              # before (:all)
-              unless stop_running
-                @before_filters[:all].each do |filter|
-                  if filter.call(event_type, event_data) == false
-                    stop_running = true
-                    break
-                  end
                 end
               end
               
@@ -209,13 +198,8 @@ module Ponder
                 # handling
                 callback.call(event_type, event_data)
                 
-                # after (event_type)
-                @after_filters[event_type].each do |filter|
-                  filter.call(event_type, event_data)
-                end
-                
-                # after (:all)
-                @after_filters[:all].each do |filter|
+                # after filters (specific filters first, then :all)
+                (@after_filters[event_type] + @after_filters[:all]).each do |filter|
                   filter.call(event_type, event_data)
                 end
               end
