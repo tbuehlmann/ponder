@@ -278,7 +278,9 @@ After Filters work the same way as Before Filters do, just after the actual even
     end
 
 ## Source
-The source can be found at GitHub: [tbuehlmann/ponder](http://github.com/tbuehlmann/ponder "Ponder")
+The source can be found at GitHub: [tbuehlmann/ponder](http://github.com/tbuehlmann/ponder "Ponder").
+
+You can contact me through GitHub and IRC (#ponder in the Freenode network).
 
 ## Discworld Context
 So, why all that silly names? Ponder Stibbons? Thaum? Twoflogger (referring to Twoflower), BlindIO? What's the Mended Drum? Who's the Librarian? Simply put, I freaking enshrine Terry Pratchett's Discworld Novels and there were no better name for this project than Ponder. Ponder Stibbons is the Head of Inadvisably Applied Magic at the Unseen University of Ankh Morpork. He researched the Thaum, like the atom, just for magic. And I just love that character, so there we are. If you're a fan too or want to talk about the Discworld, the framework, whatever, don't hesitate to contact me.
