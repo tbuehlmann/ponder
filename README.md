@@ -277,6 +277,31 @@ After Filters work the same way as Before Filters do, just after the actual even
       # ...
     end
 
+## Timers
+If you need something in an event handling process to be time-displaced, you should not use `sleep`. I recommend using the comfortable timer methods EventMachine provides. A one shot timer looks like this:
+
+    EventMachine::Timer.new(10) do
+      # code to be run after 10 seconds
+    end
+
+If you want the timer to be canceled before starting, you can do it like this:
+
+    timer = EventMachine::Timer.new(10) do
+      # code to be run after 10 seconds
+    end
+    
+    # ...
+    
+    timer.cancel
+
+You can even have periodic timers which will fire up every n seconds:
+
+    EventMachine::PeriodicTimer.new(10) do
+      # code to be run every 10 seconds
+    end
+
+A periodic timer can be canceled just like the other one.
+
 ## Source
 The source can be found at GitHub: [tbuehlmann/ponder](http://github.com/tbuehlmann/ponder "Ponder").
 
