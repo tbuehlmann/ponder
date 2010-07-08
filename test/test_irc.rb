@@ -122,5 +122,9 @@ class TestIRC < Test::Unit::TestCase
   def test_invite
     assert_equal("INVITE TheLibrarian #mended_drum\r\n", invite('TheLibrarian', '#mended_drum'))
   end
+  
+  def test_ban
+    assert_equal("MODE #mended_drum +b foo!bar@baz\r\n", ban('#mended_drum', 'foo!bar@baz'))
+  end
 end
 

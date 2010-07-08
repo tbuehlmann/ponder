@@ -201,6 +201,7 @@ Command the Thaum, very simple. Just call a method listed below on the Ponder ob
 * `away(message = nil)`
 * `back`
 * `invite(nick, channel)`
+* `ban(channel, address)`
 
 Last but not least some cool "give me something back" methods:
 

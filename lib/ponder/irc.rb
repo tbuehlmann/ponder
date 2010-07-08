@@ -100,6 +100,11 @@ module Ponder
     def invite(nick, channel)
       raw "INVITE #{nick} #{channel}"
     end
+    
+    # ban an user
+    def ban(channel, address)
+      mode channel, "+b #{address}"
+    end
   end
 end
 
