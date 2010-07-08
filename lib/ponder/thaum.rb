@@ -101,7 +101,7 @@ module Ponder
       end
     end
     
-    def connect(run = true)
+    def connect
       unless @reloading
         @traffic_logger.start_logging
         @error_logger.start_logging
@@ -110,11 +110,7 @@ module Ponder
         @traffic_logger.info '-- Starting Ponder'
         @console_logger.info '-- Starting Ponder'
         
-        if run
-          EventMachine::run do
-            @connection = EventMachine::connect(@config.server, @config.port, Connection, self)
-          end
-        else
+        EventMachine::run do
           @connection = EventMachine::connect(@config.server, @config.port, Connection, self)
         end
       end
@@ -187,21 +183,11 @@ module Ponder
             begin
               stop_running = false
               
-              # before (event_type)
-              @before_filters[event_type].each do |filter|
+              # before filters (specific filters first, then :all)
+              (@before_filters[event_type] + @before_filters[:all]).each do |filter|
                 if filter.call(event_type, event_data) == false
                   stop_running = true
                   break
-                end
-              end
-              
-              # before (:all)
-              unless stop_running
-                @before_filters[:all].each do |filter|
-                  if filter.call(event_type, event_data) == false
-                    stop_running = true
-                    break
-                  end
                 end
               end
               
@@ -209,13 +195,8 @@ module Ponder
                 # handling
                 callback.call(event_type, event_data)
                 
-                # after (event_type)
-                @after_filters[event_type].each do |filter|
-                  filter.call(event_type, event_data)
-                end
-                
-                # after (:all)
-                @after_filters[:all].each do |filter|
+                # after filters (specific filters first, then :all)
+                (@after_filters[event_type] + @after_filters[:all]).each do |filter|
                   filter.call(event_type, event_data)
                 end
               end
