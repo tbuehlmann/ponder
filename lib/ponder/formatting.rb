@@ -1,13 +1,13 @@
 module Ponder
   module Formatting
-    PLAIN      = 15.chr
-    BOLD       = 2.chr
-    ITALIC     = 22.chr
-    UNDERLINE  = 31.chr
-    COLOR_CODE = 3.chr
-    UNCOLOR    = COLOR_CODE
+    PLAIN        = 15.chr
+    BOLD         = 2.chr
+    ITALIC       = 22.chr
+    UNDERLINE    = 31.chr
+    COLOR_CODE   = 3.chr
+    UNCOLOR_CODE = COLOR_CODE
     
-    #mIRC color codes from http://www.mirc.com/help/color.txt
+    #mIRC color codes from http://www.mirc.com/help/colors.html
     COLORS = {:white  => '00',
               :black  => '01',
               :blue   => '02',
@@ -27,3 +27,4 @@ module Ponder
              }
   end
 end
+

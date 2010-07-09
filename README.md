@@ -302,6 +302,24 @@ You can even have periodic timers which will fire up every n seconds:
 
 A periodic timer can be canceled just like the other one.
 
+## Formatting
+You can format your messages with colors, make it bold, italic or underlined. All of those formatting constants are availabe through `Ponder::Formatting`.
+
+### Colors
+For coloring text you first set the color code with `Ponder::Formatting::COLOR_CODE` followed by a color followed by the text. For ending the colored text, set the uncolor code with `Ponder::Formatting::UNCOLOR`.
+
+Availabe colors are white, black, blue, green, red, brown, purple, orange, yellow, lime, teal, cyan, royal, pink, gray and silver. You can set one with the `Ponder::Formatting::COLORS` hash. Example:
+
+    "This will be #{Ponder::Formatting::COLOR_CODE}#{Ponder::Formatting::COLORS[:red]}red#{Ponder::Formatting::UNCOLOR_CODE}. This not."
+
+### Font Styles
+If you want to make a text bold, italic or underlined, use `Ponder::Formatting::BOLD`, `Ponder::Formatting::ITALIC` or `Ponder::Formatting::UNDERLINE`. After the text, close it with the same constant. Example:
+
+    "This will be #{Ponder::Formatting::UNDERLINE}underlined#{Ponder::Formatting::UNDERLINE}. This not."
+
+### Shortened Formatting
+If you don't always want to use `Ponder::Formatting`, use `include Ponder::Formatting`. All constants will then be availabe without `Ponder::Formatting` in front.
+
 ## Source
 The source can be found at GitHub: [tbuehlmann/ponder](http://github.com/tbuehlmann/ponder "Ponder").
 
