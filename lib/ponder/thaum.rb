@@ -28,7 +28,7 @@ module Ponder
                                :logging            => false,
                                :reconnect          => true,
                                :reconnect_interval => 30,
-                               :auto_rename        => true
+                               :auto_rename        => false
                               )
       
       @empty_logger   = Logger::BlindIo.new
@@ -240,3 +240,4 @@ module Ponder
     end
   end
 end
+
