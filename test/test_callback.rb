@@ -17,7 +17,6 @@ class TestCallback < Test::Unit::TestCase
   def test_perfect_case
     callback = Ponder::Callback.new(:channel, /foo/, @empty_proc)
     
-    assert_equal(:channel, callback.event_type)
     assert_equal(/foo/, callback.match)
     assert_equal(@empty_proc, callback.proc)
   end
