@@ -234,7 +234,7 @@ module Ponder
         event_types.each do |event_type|
           filter_type[event_type] << Filter.new(event_type, match, block)
         end
-      elsif
+      else
         filter_type[event_types] << Filter.new(event_types, match, block)
       end
     end
