@@ -229,7 +229,7 @@ module Ponder
       process_callbacks(event_type, event_data)
     end
     
-    def filter(filter_type, event_types = :all, match = //, block)
+    def filter(filter_type, event_types = :all, match = //, &block)
       if event_types.is_a?(Array)
         event_types.each do |event_type|
           filter_type[event_type] << Filter.new(event_type, match, block)
