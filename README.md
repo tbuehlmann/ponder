@@ -82,10 +82,6 @@ Besides the configuration for nick, server and port as shown in the **Getting St
 
     If `reconnect` is set to `true`, `reconnect_interval` describes the time in seconds, which the Thaum will wait before trying to reconnect. It defaults to `30`.
 
-* `auto_rename`
-
-    If `auto_rename` is set to `true`, the Thaum will try to rename if the chosen `nick` is already in use. It will try to take a random nick from "nick000" to "nick999".
-
 For further information, have a look at the examples.
 
 ## Advanced Event Handling

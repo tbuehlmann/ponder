@@ -28,7 +28,6 @@ module Ponder
                                :logging            => false,
                                :reconnect          => true,
                                :reconnect_interval => 30,
-                               :auto_rename        => false
                               )
       
       @empty_logger   = Logger::BlindIo.new
@@ -58,10 +57,6 @@ module Ponder
         notice env[:nick], "\001TIME #{Time.now.strftime('%a %b %d %H:%M:%S %Y')}\001"
       end
       
-      on 433 do
-        rename "#{@config.nick}#{rand(10)}#{rand(10)}#{rand(10)}"
-      end
-      
       # before and after filter
       @before_filters = Hash.new { |hash, key| hash[key] = [] }
       @after_filters = Hash.new { |hash, key| hash[key] = [] }
@@ -79,11 +74,6 @@ module Ponder
         
         unless @config.verbose
           @console_logger = @empty_logger
-        end
-        
-        # remove auto_rename callback (if differing from initialize)
-        unless @config.auto_rename
-          @callbacks.delete(433)
         end
       end
     end
