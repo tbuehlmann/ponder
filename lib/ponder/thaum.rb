@@ -27,7 +27,7 @@ module Ponder
                                :verbose            => true,
                                :logging            => false,
                                :reconnect          => true,
-                               :reconnect_interval => 30,
+                               :reconnect_interval => 30
                               )
       
       @empty_logger   = Logger::BlindIo.new
