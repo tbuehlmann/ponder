@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'ponder'
-  s.version = '0.0.1'
+  s.version = '0.0.2'
   s.summary = 'IRC bot framework'
   s.description = 'Ponder (Stibbons) is a Domain Specific Language for writing IRC Bots using the EventMachine library.'
   
@@ -12,6 +12,7 @@ Gem::Specification.new do |s|
   s.add_dependency('eventmachine', '>= 0.12.10')
   s.files = ['examples/echo.rb',
              'examples/github_blog.rb',
+             'examples/redis_last_seen.rb',
              'lib/ponder/async_irc.rb', 
              'lib/ponder/callback.rb',
              'lib/ponder/connection.rb',
@@ -27,7 +28,6 @@ Gem::Specification.new do |s|
              'lib/ponder/logger/twoflogger18.rb',
              'lib/ruby/1.8/string.rb',
              'lib/ponder.rb',
-             'test/all_tests.rb', 
              'test/test_async_irc.rb',
              'test/test_callback.rb', 
              'test/test_helper.rb',

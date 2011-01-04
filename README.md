@@ -325,7 +325,7 @@ You can contact me through [GitHub](http://github.com/tbuehlmann/ "GitHub") and 
 So, why all that silly names? Ponder Stibbons? Thaum? Twoflogger (referring to Twoflower), BlindIO? What's the Mended Drum? Who's the Librarian? Simply put, I freaking enshrine Terry Pratchett's Discworld Novels and there were no better name for this project than Ponder. Ponder Stibbons is the Head of Inadvisably Applied Magic at the Unseen University of Ankh Morpork. He researched the Thaum, like the atom, just for magic. And I just love that character, so there we are. If you're a fan too or want to talk about the Discworld, the framework, whatever, don't hesitate to contact me.
 
 ## License
-Copyright (c) 2010 Tobias Bühlmann
+Copyright (c) 2010, 2011 Tobias Bühlmann
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
