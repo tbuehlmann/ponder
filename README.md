@@ -72,7 +72,7 @@ Besides the configuration for nick, server and port as shown in the **Getting St
     
     You can access the logger instances via `@ponder.traffic_logger` or `@ponder.error_logger`, so you could do: `@ponder.traffic_logger.info('I did this and that right now')`.
     
-    It defaults to `false`. (xxx other methods)
+    It defaults to `false`. (TODO: write about "other" logger methods)
 
 * `reconnect`
 
