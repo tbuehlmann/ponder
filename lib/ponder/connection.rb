@@ -31,7 +31,7 @@ module Ponder
     end
     
     def receive_line(line)
-      @thaum.parse line.force_encoding('utf-8')
+      @thaum.parse line
     end
   end
 end
