@@ -26,7 +26,6 @@ Gem::Specification.new do |s|
              'lib/ponder/logger/blind_io.rb', 
              'lib/ponder/logger/twoflogger.rb', 
              'lib/ponder/logger/twoflogger18.rb',
-             'lib/ruby/1.8/string.rb',
              'lib/ponder.rb',
              'test/test_async_irc.rb',
              'test/test_callback.rb', 
