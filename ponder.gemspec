@@ -16,7 +16,6 @@ Gem::Specification.new do |s|
              'lib/ponder/async_irc.rb', 
              'lib/ponder/callback.rb',
              'lib/ponder/connection.rb',
-             'lib/ponder/delegate.rb',
              'lib/ponder/filter.rb',
              'lib/ponder/formatting.rb',
              'lib/ponder/irc.rb',
