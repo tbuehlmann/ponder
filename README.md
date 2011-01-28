@@ -266,6 +266,17 @@ You can have Before Filters! They are called before each event handling process 
 
 This Before Filter will be called, if a channel message with the word "foo" gets in. You can use all other event types (like :query, :kick, ...) as well. Also possible is an array notation like `before_filter([:query, :channel], /foo/) ...`. If you want the filter to work an all event types, you can simply use `:all`. Filters will be called in defining order; first defined, first called. Event specific filters are called before `:all` filters.
 
+You could use it for authentication/authorization. Example:
+
+    @ponder.before_filter :channel, // do |event_data|
+      if is_an_admin?(event_data[:nick])
+        event_data[:authorized_request] = true
+      else
+        event_data[:authorized_request] = false
+      end
+    end
+
+Now, one can check for `event_data[:authorized_request]` in a callback.
 ### After Filters
 After Filters work the same way as Before Filters do, just after the actual event handling process. An After Filter does not hinder later After Filters to fire up if it returns `false`. Example:
 

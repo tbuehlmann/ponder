@@ -1,7 +1,6 @@
 require 'ponder/async_irc'
 require 'ponder/callback'
 require 'ponder/connection'
-require 'ponder/filter'
 require 'ponder/irc'
 require 'ponder/logger/twoflogger'
 require 'ponder/logger/blind_io'
@@ -73,7 +72,7 @@ module Ponder
         if @config.logging
           log_path = @config.log_path || File.join(ROOT, 'logs', 'log.log')
           log_dir = File.dirname(log_path)
-          FileUtils.mkdir_p(log_dir) unless Dir.exist?(log_dir)
+          FileUtils.mkdir_p(log_dir) unless File.exist?(log_dir)
 
           if @config.logger
             @logger = @config.logger
@@ -221,7 +220,7 @@ module Ponder
       process_callbacks(event_type, event_data)
     end
 
-    def filter(filter_type, event_types = :all, match = //, &block)
+    def filter(filter_type, event_types = :all, match = //, block = Proc.new)
       if event_types.is_a?(Array)
         event_types.each do |event_type|
           filter_type[event_type] << Filter.new(event_type, match, block)
