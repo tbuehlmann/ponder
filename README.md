@@ -66,13 +66,13 @@ Besides the configuration for nick, server and port as shown in the **Getting St
 
 * `logging`
 
-    If `logging` is set to `true`, all incoming and outgoing traffic will be logged to logs/traffic.log and errors will be logged to logs/error.log. If you just want to log errors, you can manipulate the traffic logger in the configure block with `c.traffic_logger = c.empty_logger`. A logger set to `empty_logger` will not log anything.
+    If `logging` is set to `true`, all incoming and outgoing traffic and exceptions will be logged to logs/log.log.
     
-    You can also define other loggers for traffic\_logger and error\_logger with `c.traffic_logger = @my_cool_logger` or `c.traffic_logger = Logger.new(...)`. Per default, there are just #info and #error called on the logger.
+    You can also define your own logger, use `c.logger = @my_cool_logger` or `c.logger = Logger.new(...)`. Ponder itself just uses the #info and #error methods on the logger.
     
-    You can access the logger instances via `@ponder.traffic_logger` or `@ponder.error_logger`, so you could do: `@ponder.traffic_logger.info('I did this and that right now')`.
+    You can access the logger instance via `@ponder.logger`, so you could do: `@ponder.logger.info('I did this and that right now')`.
     
-    It defaults to `false`. (TODO: write about "other" logger methods)
+    It defaults to `false`.
 
 * `reconnect`
 
@@ -322,7 +322,7 @@ The source can be found at GitHub: [tbuehlmann/ponder](http://github.com/tbuehlm
 You can contact me through [GitHub](http://github.com/tbuehlmann/ "GitHub") and IRC (named tbuehlmann in the Freenode network).
 
 ## Discworld Context
-So, why all that silly names? Ponder Stibbons? Thaum? Twoflogger (referring to Twoflower), BlindIO? What's the Mended Drum? Who's the Librarian? Simply put, I freaking enshrine Terry Pratchett's Discworld Novels and there were no better name for this project than Ponder. Ponder Stibbons is the Head of Inadvisably Applied Magic at the Unseen University of Ankh Morpork. He researched the Thaum, like the atom, just for magic. And I just love that character, so there we are. If you're a fan too or want to talk about the Discworld, the framework, whatever, don't hesitate to contact me.
+So, why all that silly names? Ponder Stibbons? Thaum? Twoflogger (referring to Twoflower), BlindIo? What's the Mended Drum? Who's the Librarian? Simply put, I freaking enshrine Terry Pratchett's Discworld Novels and there were no better name for this project than Ponder. Ponder Stibbons is the Head of Inadvisably Applied Magic at the Unseen University of Ankh Morpork. He researched the Thaum, like the atom, just for magic. And I just love that character, so there we are. If you're a fan too or want to talk about the Discworld, the framework, whatever, don't hesitate to contact me.
 
 ## License
 Copyright (c) 2010, 2011 Tobias Bühlmann

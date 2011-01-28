@@ -1,11 +1,11 @@
 module Ponder
-  module Logger
-    class BlindIo
-      def initialize
-        [:debug, :info, :warn, :error, :fatal, :unknown, :start_logging, :stop_logging].each do |method_name|
-          self.class.send(:define_method, method_name, Proc.new { |*args| nil })
-        end
-      end
+  class BlindIo
+    [:debug, :info, :warn, :error, :fatal].each do |severity_method|
+      send(:define_method, severity_method, Proc.new { |*args, &block| nil })
+    end
+
+    def method_missing(*args, &block)
     end
   end
 end
+
