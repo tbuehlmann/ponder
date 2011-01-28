@@ -1,7 +1,4 @@
-require 'pathname'
-require 'rubygems'
-
-$LOAD_PATH.unshift Pathname.new(__FILE__).dirname.expand_path
+$LOAD_PATH.unshift(File.dirname(__FILE__))
 
 module Ponder
   def self.root
