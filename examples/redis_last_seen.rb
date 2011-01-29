@@ -3,10 +3,10 @@
 # 
 # The redis server version needs to be >= 1.3.10 for hash support.
 
-require 'pathname'
-$LOAD_PATH.unshift Pathname.new(__FILE__).dirname.expand_path.join('..', 'lib')
-require 'ponder'
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+
 require 'rubygems'
+require 'ponder'
 require 'redis'
 
 FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -17,28 +17,29 @@ class String
   end
 end
 
-@last_seen = Redis.new(:thread_safe => true)
+@redis = Redis.new(:thread_safe => true)
 
 def remember(lowercase_nick, nick, user, host, channel, action,
                action_content)
-  @last_seen.hmset(lowercase_nick,
-                     'nick',           nick,
-                     'user',           user,
-                     'host',           host,
-                     'channel',        channel,
-                     'action',         action,
-                     'action_content', action_content,
-                     'updated_at',     Time.now.to_i)
+  @redis.hmset(
+    lowercase_nick,
+    'nick',           nick,
+    'user',           user,
+    'host',           host,
+    'channel',        channel,
+    'action',         action,
+    'action_content', action_content,
+    'updated_at',     Time.now.to_i)
 end
 
 @ponder = Ponder::Thaum.new
 
 @ponder.configure do |c|
-  c.server    = 'chat.freenode.org'
-  c.port      = 6667
-  c.nick      = 'Ponder'
-  c.verbose   = true
-  c.logging   = false
+  c.server  = 'chat.freenode.org'
+  c.port    = 6667
+  c.nick    = 'Ponder'
+  c.verbose = true
+  c.logging = false
 end
 
 @ponder.on :connect do
@@ -76,9 +77,9 @@ end
              "#{event_data[:nick]} #{event_data[:reason]}")
 end
 
-def last_seen(nick, event_data)
-  data = @last_seen.hgetall nick
-  
+def last_seen(nick)
+  data = @redis.hgetall(nick)
+
   case data['action']
   when 'channel'
     "#{data['nick']} wrote something in #{data['channel']} at #{Time.at(data['updated_at'].to_i).strftime(FORMAT)}."
@@ -101,21 +102,21 @@ end
 
 @ponder.on :channel, /^!seen \S+$/ do |event_data|
   nick = event_data[:message].split(' ')[1].downcase
-  
+
   # wildcards
   if nick =~ /\*/
-    users = @last_seen.keys nick.escape_redis
+    users = @redis.keys nick.escape_redis
     results = users.length
-    
+
     case results
     when 0
       @ponder.message event_data[:channel], 'No such nick found.'
     when 1
-      @ponder.message last_seen(users[0])
+      @ponder.message event_data[:channel], last_seen(users[0])
     when 2..5
       nicks = []
       users.each do |user|
-        nicks << @last_seen.hgetall(user)['nick']
+        nicks << @redis.hgetall(user)['nick']
       end
       nicks = nicks.join(', ')
       @ponder.message event_data[:channel], "#{results} nicks found (#{nicks})."
@@ -123,8 +124,8 @@ end
       @ponder.message event_data[:channel], "Too many results (#{results})."
     end
   # single search
-  elsif @last_seen.exists nick
-    msg = last_seen(nick, event_data)
+  elsif @redis.exists nick
+    msg = last_seen(nick)
     if online_nick = @ponder.whois(nick)
       msg = "#{online_nick[:nick]} is online. (#{msg})"
     end

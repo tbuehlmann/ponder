@@ -1,8 +1,7 @@
-require 'pathname'
-$LOAD_PATH.unshift Pathname.new(__FILE__).dirname.expand_path.join('..', 'lib')
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
-require 'ponder'
 require 'rubygems'
+require 'ponder'
 require 'nokogiri'
 require 'open-uri'
 
@@ -10,11 +9,11 @@ require 'open-uri'
 @ponder = Ponder::Thaum.new
 
 @ponder.configure do |c|
-  c.server    = 'chat.freenode.org'
-  c.port      = 6667
-  c.nick      = 'Ponder'
-  c.verbose   = true
-  c.logging   = false
+  c.server  = 'chat.freenode.org'
+  c.port    = 6667
+  c.nick    = 'Ponder'
+  c.verbose = true
+  c.logging = false
 end
 
 @ponder.on :connect do
@@ -22,10 +21,11 @@ end
 end
 
 @ponder.on :channel, /^blog\?$/ do |event_data|
-  doc = Nokogiri::HTML(open('http://github.com/blog'))
-  title = doc.xpath('//html/body/div/div[2]/div/div/ul/li/h2/a')[0].text
-  
+  doc = Nokogiri::HTML(open('https://github.com/blog'))
+  title = doc.xpath('/html/body/div/div[2]/div/div/ul/li/h2/a')[0].text
+
   @ponder.message event_data[:channel], "Newest Github Blog Post: #{title}"
 end
 
 @ponder.connect
+

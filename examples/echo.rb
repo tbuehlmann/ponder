@@ -1,5 +1,4 @@
-require 'pathname'
-$LOAD_PATH.unshift Pathname.new(__FILE__).dirname.expand_path.join('..', 'lib')
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require 'ponder'
 
@@ -23,3 +22,4 @@ end
 end
 
 @ponder.connect
+
