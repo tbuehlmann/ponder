@@ -15,6 +15,9 @@ module Ponder
     def fatal(*args, &block)
     end
 
+    def unknown(*args, &block)
+    end
+
     def method_missing(*args, &block)
     end
   end

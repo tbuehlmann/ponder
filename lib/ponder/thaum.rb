@@ -192,8 +192,10 @@ module Ponder
                 end
               end
             rescue => e
-              @logger.error("#{e.class}: #{e.message}\n#{e.backtrace.join("\n")}")
-              @console_logger.error("#{e.class}: #{e.message}\n#{e.backtrace.join("\n")}")
+              [@logger, @console_logger].each do |logger|
+                logger.error("-- #{e.class}: #{e.message}")
+                e.backtrace.each { |line| logger.error("-- #{line}") }
+              end
             end
           end
         )
