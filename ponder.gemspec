@@ -10,28 +10,29 @@ Gem::Specification.new do |s|
   
   s.required_ruby_version = '>= 1.8.6'
   s.add_dependency('eventmachine', '>= 0.12.10')
-  s.files = ['examples/echo.rb',
-             'examples/github_blog.rb',
-             'examples/redis_last_seen.rb',
-             'lib/ponder/async_irc.rb', 
-             'lib/ponder/callback.rb',
-             'lib/ponder/connection.rb',
-             'lib/ponder/filter.rb',
-             'lib/ponder/formatting.rb',
-             'lib/ponder/irc.rb',
-             'lib/ponder/logger',
-             'lib/ponder/thaum.rb',
-             'lib/ponder/version.rb',
-             'lib/ponder/logger/blind_io.rb', 
-             'lib/ponder/logger/twoflogger.rb', 
-             'lib/ponder/logger/twoflogger18.rb',
-             'lib/ponder.rb',
-             'test/test_async_irc.rb',
-             'test/test_callback.rb', 
-             'test/test_helper.rb',
-             'test/test_irc.rb',
-             'LICENSE',
-             'ponder.gemspec',
-             'README.md']
+  s.files = %w[
+    LICENSE
+    README.md
+    Rakefile
+    examples/echo.rb
+    examples/github_blog.rb
+    examples/redis_last_seen.rb
+    lib/ponder.rb
+    lib/ponder/async_irc.rb
+    lib/ponder/callback.rb
+    lib/ponder/connection.rb
+    lib/ponder/filter.rb
+    lib/ponder/formatting.rb
+    lib/ponder/irc.rb
+    lib/ponder/logger/blind_io.rb
+    lib/ponder/logger/twoflogger.rb
+    lib/ponder/thaum.rb
+    lib/ponder/version.rb
+    ponder.gemspec
+    test/test_async_irc.rb
+    test/test_callback.rb
+    test/test_helper.rb
+    test/test_irc.rb
+  ]
 end
 

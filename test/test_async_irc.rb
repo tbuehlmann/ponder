@@ -1,18 +1,13 @@
-require 'pathname'
-$LOAD_PATH.unshift Pathname.new(__FILE__).dirname.expand_path
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+
 require 'test_helper'
 require 'ponder/async_irc'
 
-module Ponder
-  module AsyncIRC
-    def raw(*args)
-    end
-  end
+include Ponder::AsyncIRC
+def raw(*args)
 end
 
-include Ponder::AsyncIRC
-
-class TestIRC < Test::Unit::TestCase
+class TestAsyncIRC < Test::Unit::TestCase
   def setup
     @observer_queues = {}
   end
