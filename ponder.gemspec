@@ -1,6 +1,10 @@
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+
+require 'lib/ponder/version'
+
 Gem::Specification.new do |s|
   s.name = 'ponder'
-  s.version = '0.0.2'
+  s.version = Ponder::VERSION
   s.summary = 'IRC bot framework'
   s.description = 'Ponder (Stibbons) is a Domain Specific Language for writing IRC Bots using the EventMachine library.'
   
