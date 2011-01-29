@@ -5,13 +5,14 @@ require 'lib/ponder/version'
 Gem::Specification.new do |s|
   s.name = 'ponder'
   s.version = Ponder::VERSION
+  s.date = '2011-01-29'
   s.summary = 'IRC bot framework'
   s.description = 'Ponder (Stibbons) is a Domain Specific Language for writing IRC Bots using the EventMachine library.'
-  
+
   s.author = 'Tobias Bühlmann'
   s.email = 'tobias.buehlmann@gmx.de'
   s.homepage = 'http://github.com/tbuehlmann/ponder'
-  
+
   s.required_ruby_version = '>= 1.8.6'
   s.add_dependency('eventmachine', '>= 0.12.10')
   s.files = %w[
