@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 1.8.6'
   s.add_dependency('eventmachine', '>= 0.12.10')
+  s.add_development_dependency('rspec')
   s.files = %w[
     LICENSE
     README.md
