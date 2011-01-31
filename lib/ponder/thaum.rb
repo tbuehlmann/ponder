@@ -12,7 +12,7 @@ module Ponder
     include IRC
     include AsyncIRC
 
-    attr_reader :config
+    attr_reader :config, :callbacks
     attr_accessor :connected, :logger, :console_logger
 
     def initialize
