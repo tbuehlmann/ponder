@@ -44,7 +44,7 @@ describe Ponder::Thaum do
     end
 
     it 'VERSION' do
-      @ponder.should_receive(:notice).with('Peter', "\001VERSION Ponder #{Ponder::VERSION} (http://github.com/tbuehlmann/ponder)\001")
+      @ponder.should_receive(:notice).with('Peter', "\001VERSION Ponder #{Ponder::VERSION} (https://github.com/tbuehlmann/ponder)\001")
       EM.run do
         @ponder.process_callbacks(:query, {:nick => 'Peter', :message => "\001VERSION\001"})
         EM.schedule { EM.stop }

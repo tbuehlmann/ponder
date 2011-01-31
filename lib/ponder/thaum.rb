@@ -46,7 +46,7 @@ module Ponder
       end
 
       on :query, /^\001VERSION\001$/ do |event_data|
-        notice event_data[:nick], "\001VERSION Ponder #{Ponder::VERSION} (http://github.com/tbuehlmann/ponder)\001"
+        notice event_data[:nick], "\001VERSION Ponder #{Ponder::VERSION} (https://github.com/tbuehlmann/ponder)\001"
       end
 
       on :query, /^\001TIME\001$/ do |event_data|
