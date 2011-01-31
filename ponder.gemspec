@@ -35,10 +35,10 @@ Gem::Specification.new do |s|
     lib/ponder/thaum.rb
     lib/ponder/version.rb
     ponder.gemspec
-    test/test_async_irc.rb
-    test/test_callback.rb
-    test/test_helper.rb
-    test/test_irc.rb
+    spec/callback_spec.rb
+    spec/irc_spec.rb
+    spec/spec_helper.rb
+    spec/thaum_spec.rb
   ]
 end
 
