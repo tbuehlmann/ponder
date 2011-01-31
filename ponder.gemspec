@@ -35,6 +35,7 @@ Gem::Specification.new do |s|
     lib/ponder/thaum.rb
     lib/ponder/version.rb
     ponder.gemspec
+    spec/async_irc_spec.rb
     spec/callback_spec.rb
     spec/irc_spec.rb
     spec/spec_helper.rb
