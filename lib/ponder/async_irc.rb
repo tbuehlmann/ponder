@@ -71,22 +71,22 @@ module Ponder
 
     def whois(nick)
       queue = Queue.new
-      @observer_queues[queue] = [/^:\S+ (307|311|312|318|319|401) \S+ #{Regexp.escape(nick)}/i]
+      @observer_queues[queue] = [/^:\S+ (307|311|312|318|319|330|401) \S+ #{Regexp.escape(nick)}/i]
       raw "WHOIS #{nick}"
       whois = {}
       running = true
 
-      while running
-        begin
-          Timeout::timeout(TIMEOUT) do
+      begin
+        Timeout::timeout(TIMEOUT) do
+          while running
             response = queue.pop
             raw_numeric = response.scan(/^:\S+ (\d{3})/)[0][0]
 
             case raw_numeric
-            when '307'
+            when '307', '330'
               whois[:registered] = true
             when '311'
-              response = response.scan(/^:\S+ 311 \S+ (\S+) (\S+) (\S+) \* :(.*)$/)[0]
+              response = response.scan(/^:\S+ 311 \S+ (\S+) :?(\S+) (\S+) \* :(.*)$/)[0]
               whois[:nick]      = response[0]
               whois[:username]  = response[1]
               whois[:host]      = response[2]
@@ -107,9 +107,9 @@ module Ponder
               running = false
             end
           end
-        rescue Timeout::Error
-          nil
         end
+      rescue Timeout::Error
+        nil
       end
 
       @observer_queues.delete queue
