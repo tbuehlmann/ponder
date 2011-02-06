@@ -36,7 +36,7 @@ module Ponder
 
     def channel_info(channel)
       queue = Queue.new
-      @observer_queues[queue] = [/:\S+ (324|329|403) \S+ #{Regexp.escape(channel)}/i]
+      @observer_queues[queue] = [/:\S+ (324|329|403|442) \S+ #{Regexp.escape(channel)}/i]
       raw "MODE #{channel}"
       information = {}
       running = true
@@ -55,7 +55,7 @@ module Ponder
             when '329'
               information[:created_at] = Time.at(response.scan(/^:\S+ 329 \S+ \S+ (\d+)/)[0][0].to_i)
               running = false
-            when '403'
+            when '403', '442'
               information = false
               running = false
             end
