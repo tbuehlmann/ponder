@@ -1,10 +1,9 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
+require 'rubygems'
+require 'rspec/core/rake_task'
 
-task :spec do
-  require 'spec/irc_spec'
-  require 'spec/callback_spec'
-  require 'spec/thaum_spec'
-end
+desc 'Run all specs'
+RSpec::Core::RakeTask.new(:spec)
 
+task :test => :spec
 task :default => :spec
 
