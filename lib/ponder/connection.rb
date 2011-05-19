@@ -28,7 +28,6 @@ module Ponder
         end
       else
         @thaum.logger.close
-        @thaum.console_logger.close
       end
     end
 
