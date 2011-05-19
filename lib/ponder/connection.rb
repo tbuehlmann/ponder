@@ -27,7 +27,6 @@ module Ponder
           reconnect @thaum.config.server, @thaum.config.port
         end
       else
-        EventMachine::stop_event_loop
         @thaum.logger.close
         @thaum.console_logger.close
       end
