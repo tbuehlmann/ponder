@@ -6,14 +6,15 @@ require 'ponder/logger/twoflogger'
 require 'ponder/logger/blind_io'
 require 'ostruct'
 autoload :FileUtils, 'fileutils'
+autoload :Set, 'set'
 
 module Ponder
   class Thaum
     include IRC
-    include AsyncIRC
+    include AsyncIRC::Delegate
 
     attr_reader :config, :callbacks
-    attr_accessor :connected, :logger, :console_logger
+    attr_accessor :connected, :logger, :console_logger, :deferrables
 
     def initialize
       @config = OpenStruct.new(
@@ -31,7 +32,9 @@ module Ponder
       @logger = BlindIo.new
       @console_logger = Twoflogger.new($stdout)
 
-      @observer_queues = {}
+      # when using methods like #get_topic or #whois, a Deferrable object will wait
+      # for the response and call a callback. these Deferrables are stored in this Set
+      @deferrables = Set.new
 
       @connected = false
       @reloading = false
@@ -157,13 +160,8 @@ module Ponder
         parse_event(:topic, :type => :topic, :nick => $1, :user => $2, :host => $3, :channel => $4, :topic => $')
       end
 
-      @observer_queues.each do |queue, regexps|
-        regexps.each do |regexp|
-          if message =~ regexp
-            queue << message
-          end
-        end
-      end
+      # if there are pending deferrabels, check if the message suits their matching pattern
+      @deferrables.each { |d| d.try(message) }
     end
 
     # process callbacks with its begin; rescue; end

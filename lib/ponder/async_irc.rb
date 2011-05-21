@@ -1,120 +1,157 @@
 require 'thread'
 require 'timeout'
+require 'eventmachine'
 
 module Ponder
   module AsyncIRC
-    TIMEOUT = 30
+    class Topic
+      # number of seconds the deferrable will wait for a response before failing
+      TIMEOUT = 15
 
-    def get_topic(channel)
-      queue = Queue.new
-      @observer_queues[queue] = [/:\S+ (331|332|403|442) \S+ #{Regexp.escape(channel)} :/i]
-      raw "TOPIC #{channel}"
+      include EventMachine::Deferrable
 
-      topic = begin
-        Timeout::timeout(TIMEOUT) do
-          response = queue.pop
-          raw_numeric = response.scan(/^:\S+ (\d{3})/)[0][0]
+      def initialize(channel, timeout_after, ponder)
+        @channel = channel
+        @ponder = ponder
+
+        self.timeout(timeout_after)
+        self.errback { @ponder.deferrables.delete self }
+
+        @ponder.deferrables.add self
+        @ponder.raw "TOPIC #{@channel}"
+      end
+
+      def try(message)
+        if message =~ /:\S+ (331|332|403|442) \S+ #{Regexp.escape(@channel)} :/i
+          raw_numeric = message.scan(/^:\S+ (\d{3})/)[0][0]
 
           case raw_numeric
           when '331'
-            {:raw_numeric => 331, :message => 'No topic is set'}
+            succeed({:raw_numeric => 331, :message => 'No topic is set'})
           when '332'
-            {:raw_numeric => 332, :message => response.scan(/ :(.*)/)[0][0]}
+            succeed({:raw_numeric => 332, :message => message.scan(/ :(.*)/)[0][0]})
           when '403'
-            {:raw_numeric => 403, :message => 'No such channel'}
+            succeed({:raw_numeric => 403, :message => 'No such channel'})
           when '442'
-            {:raw_numeric => 442, :message => "You're not on that channel"}
+            succeed({:raw_numeric => 442, :message => "You're not on that channel"})
           end
         end
-      rescue Timeout::Error
-        false
       end
 
-      @observer_queues.delete queue
-      return topic
+      def succeed(*args)
+        @ponder.deferrables.delete self
+        set_deferred_status :succeeded, *args
+      end
     end
 
-    def channel_info(channel)
-      queue = Queue.new
-      @observer_queues[queue] = [/:\S+ (324|329|403|442) \S+ #{Regexp.escape(channel)}/i]
-      raw "MODE #{channel}"
-      information = {}
-      running = true
+    class Whois
+      # number of seconds the deferrable will wait for a response before failing
+      TIMEOUT = 15
 
-      begin
-        Timeout::timeout(TIMEOUT) do
-          while running
-            response = queue.pop
-            raw_numeric = response.scan(/^:\S+ (\d{3})/)[0][0]
+      include EventMachine::Deferrable
 
-            case raw_numeric
-            when '324'
-              information[:modes] = response.scan(/^:\S+ 324 \S+ \S+ \+(\w*)/)[0][0].split('')
-              limit = response.scan(/^:\S+ 324 \S+ \S+ \+\w* (\w*)/)[0]
-              information[:channel_limit] = limit[0].to_i if limit
-            when '329'
-              information[:created_at] = Time.at(response.scan(/^:\S+ 329 \S+ \S+ (\d+)/)[0][0].to_i)
-              running = false
-            when '403', '442'
-              information = false
-              running = false
-            end
-          end
-        end
-      rescue Timeout::Error
-        information = false
+      def initialize(nick, timeout_after, ponder)
+        @nick = nick
+        @ponder = ponder
+        @whois_data = {}
+
+        self.timeout(timeout_after)
+        self.errback { @ponder.deferrables.delete self }
+
+        @ponder.deferrables.add self
+        @ponder.raw "WHOIS #{@nick}"
       end
 
-      @observer_queues.delete queue
-      return information
+      def try(message)
+        if message =~ /^:\S+ (307|311|312|318|319|330|401) \S+ #{Regexp.escape(@nick)}/i
+          raw_numeric = message.scan(/^:\S+ (\d{3})/)[0][0]
+
+          case raw_numeric
+          when '307', '330'
+            @whois_data[:registered] = true
+          when '311'
+            message = message.scan(/^:\S+ 311 \S+ (\S+) :?(\S+) (\S+) \* :(.*)$/)[0]
+            @whois_data[:nick]      = message[0]
+            @whois_data[:username]  = message[1]
+            @whois_data[:host]      = message[2]
+            @whois_data[:real_name] = message[3]
+          when '312'
+            message = message.scan(/^:\S+ 312 \S+ \S+ (\S+) :(.*)/)[0]
+            @whois_data[:server] = {:address => message[0], :name => message[1]}
+          when '318'
+            succeed @whois_data
+          when '319'
+            channels_with_mode = message.scan(/^:\S+ 319 \S+ \S+ :(.*)/)[0][0].split(' ')
+            @whois_data[:channels] = {}
+            channels_with_mode.each do |c|
+              @whois_data[:channels][c.scan(/(.)?(#\S+)/)[0][1]] = c.scan(/(.)?(#\S+)/)[0][0]
+            end
+          when '401'
+            succeed false
+          end
+        end
+      end
+
+      def succeed(*args)
+        @ponder.deferrables.delete self
+        set_deferred_status :succeeded, *args
+      end
     end
 
-    def whois(nick)
-      queue = Queue.new
-      @observer_queues[queue] = [/^:\S+ (307|311|312|318|319|330|401) \S+ #{Regexp.escape(nick)}/i]
-      raw "WHOIS #{nick}"
-      whois = {}
-      running = true
+    class Channel
+      # number of seconds the deferrable will wait for a response before failing
+      TIMEOUT = 15
 
-      begin
-        Timeout::timeout(TIMEOUT) do
-          while running
-            response = queue.pop
-            raw_numeric = response.scan(/^:\S+ (\d{3})/)[0][0]
+      include EventMachine::Deferrable
 
-            case raw_numeric
-            when '307', '330'
-              whois[:registered] = true
-            when '311'
-              response = response.scan(/^:\S+ 311 \S+ (\S+) :?(\S+) (\S+) \* :(.*)$/)[0]
-              whois[:nick]      = response[0]
-              whois[:username]  = response[1]
-              whois[:host]      = response[2]
-              whois[:real_name] = response[3]
-            when '312'
-              response = response.scan(/^:\S+ 312 \S+ \S+ (\S+) :(.*)/)[0]
-              whois[:server] = {:address => response[0], :name => response[1]}
-            when '318'
-              running = false
-            when '319'
-              channels_with_mode = response.scan(/^:\S+ 319 \S+ \S+ :(.*)/)[0][0].split(' ')
-              whois[:channels] = {}
-              channels_with_mode.each do |c|
-                whois[:channels][c.scan(/(.)?(#\S+)/)[0][1]] = c.scan(/(.)?(#\S+)/)[0][0]
-              end
-            when '401'
-              whois = false
-              running = false
-            end
-          end
-        end
-      rescue Timeout::Error
-        nil
+      def initialize(channel, timeout_after, ponder)
+        @channel = channel
+        @ponder = ponder
+        @channel_information = {}
+
+        self.timeout(timeout_after)
+        self.errback { @ponder.deferrables.delete self }
+
+        @ponder.deferrables.add self
+        @ponder.raw "MODE #{@channel}"
       end
 
-      @observer_queues.delete queue
-      return whois
+      def try(message)
+        if message =~ /:\S+ (324|329|403|442) \S+ #{Regexp.escape(@channel)}/i
+          raw_numeric = message.scan(/^:\S+ (\d{3})/)[0][0]
+
+          case raw_numeric
+          when '324'
+            @channel_information[:modes] = message.scan(/^:\S+ 324 \S+ \S+ \+(\w*)/)[0][0].split('')
+            limit = message.scan(/^:\S+ 324 \S+ \S+ \+\w* (\w*)/)[0]
+            @channel_information[:channel_limit] = limit[0].to_i if limit
+          when '329'
+            @channel_information[:created_at] = Time.at(message.scan(/^:\S+ 329 \S+ \S+ (\d+)/)[0][0].to_i)
+            succeed @channel_information
+          when '403', '442'
+            succeed false
+          end
+        end
+      end
+
+      def succeed(*args)
+        @ponder.deferrables.delete self
+        set_deferred_status :succeeded, *args
+      end
+    end
+
+    module Delegate
+      def get_topic(channel, timeout_after = AsyncIRC::Topic::TIMEOUT)
+        AsyncIRC::Topic.new(channel, timeout_after, self)
+      end
+
+      def whois(nick, timeout_after = AsyncIRC::Whois::TIMEOUT)
+        AsyncIRC::Whois.new(nick, timeout_after, self)
+      end
+
+      def channel_info(channel, timeout_after = AsyncIRC::Channel::TIMEOUT)
+        AsyncIRC::Channel.new(channel, timeout_after, self)
+      end
     end
   end
 end
-
