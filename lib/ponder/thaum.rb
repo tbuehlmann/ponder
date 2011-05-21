@@ -11,6 +11,7 @@ autoload :Set, 'set'
 
 module Ponder
   class Thaum
+    attr_accessor :after_filters, :before_filters
     include IRC
     include AsyncIRC::Delegate
 
@@ -232,10 +233,10 @@ module Ponder
     def filter(filter_type, event_types = :all, match = //, block = Proc.new)
       if event_types.is_a?(Array)
         event_types.each do |event_type|
-          filter_type[event_type] << Filter.new(event_type, match, block)
+          filter_type[event_type] << Filter.new(event_type, match, {}, block)
         end
       else
-        filter_type[event_types] << Filter.new(event_types, match, block)
+        filter_type[event_types] << Filter.new(event_types, match, {}, block)
       end
     end
   end
