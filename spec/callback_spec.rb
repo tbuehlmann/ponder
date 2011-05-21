@@ -25,12 +25,12 @@ describe Ponder::Callback do
     end
 
     it 'with an invalid proc' do
-      lambda { Ponder::Callback.new(:channel, /foo/, 8) }.should raise_error(TypeError)
+      lambda { Ponder::Callback.new(:channel, /foo/, {}, 8) }.should raise_error(TypeError)
     end
   end
 
   it "calls the callback's proc on right match" do
-    callback = Ponder::Callback.new(:channel, /wizzard/, Proc.new { 8 })
+    callback = Ponder::Callback.new(:channel, /wizzard/, {}, Proc.new { 8 })
     callback.call(:channel, {:message => 'I like wizzards'}).should eql(8)
   end
 

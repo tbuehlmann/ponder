@@ -1,3 +1,4 @@
+require 'core_ext/array'
 require 'ponder/async_irc'
 require 'ponder/callback'
 require 'ponder/connection'
@@ -86,11 +87,13 @@ module Ponder
       end
     end
 
-    def on(event_types = [:channel], match = //, &block)
+    def on(event_types = [:channel], match = //, *options, &block)
+      options = options.extract_options!
+
       if event_types.is_a?(Array)
-        callbacks = event_types.map { |event_type| Callback.new(event_type, match, block) }
+        callbacks = event_types.map { |event_type| Callback.new(event_type, match, options, block) }
       else
-        callbacks = [Callback.new(event_types, match, block)]
+        callbacks = [Callback.new(event_types, match, options, block)]
         event_types = [event_types]
       end
 
@@ -167,7 +170,8 @@ module Ponder
     # process callbacks with its begin; rescue; end
     def process_callbacks(event_type, event_data)
       @callbacks[event_type].each do |callback|
-        EM.defer do
+        # process chain of before_filters, callback handling and after_filters
+        process = proc do
           begin
             stop_running = false
 
@@ -194,6 +198,13 @@ module Ponder
               e.backtrace.each { |line| logger.error("-- #{line}") }
             end
           end
+        end
+
+        # defer the whole process
+        if callback.options[:defer]
+          EM.defer(process)
+        else
+          process.call
         end
       end
     end
