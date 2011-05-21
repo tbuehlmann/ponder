@@ -169,39 +169,37 @@ module Ponder
     # process callbacks with its begin; rescue; end
     def process_callbacks(event_type, event_data)
       @callbacks[event_type].each do |callback|
-        EM.defer(
-          Proc.new do
-            begin
-              stop_running = false
+        EM.defer do
+          begin
+            stop_running = false
 
-              # before filters (specific filters first, then :all)
-              (@before_filters[event_type] + @before_filters[:all]).each do |filter|
-                if filter.call(event_type, event_data) == false
-                  stop_running = true
-                  break
-                end
-              end
-
-              unless stop_running
-                # handling
-                callback.call(event_type, event_data)
-
-                # after filters (specific filters first, then :all)
-                (@after_filters[event_type] + @after_filters[:all]).each do |filter|
-                  filter.call(event_type, event_data)
-                end
-              end
-            rescue => e
-              [@logger, @console_logger].each do |logger|
-                logger.error("-- #{e.class}: #{e.message}")
-                e.backtrace.each { |line| logger.error("-- #{line}") }
+            # before filters (specific filters first, then :all)
+            (@before_filters[event_type] + @before_filters[:all]).each do |filter|
+              if filter.call(event_type, event_data) == false
+                stop_running = true
+                break
               end
             end
+
+            unless stop_running
+              # handling
+              callback.call(event_type, event_data)
+
+              # after filters (specific filters first, then :all)
+              (@after_filters[event_type] + @after_filters[:all]).each do |filter|
+                filter.call(event_type, event_data)
+              end
+            end
+          rescue => e
+            [@logger, @console_logger].each do |logger|
+              logger.error("-- #{e.class}: #{e.message}")
+              e.backtrace.each { |line| logger.error("-- #{line}") }
+            end
           end
-        )
+        end
       end
     end
-    
+
     def before_filter(event_types = :all, match = //, &block)
       filter(@before_filters, event_types, match, block)
     end
@@ -233,4 +231,3 @@ module Ponder
     end
   end
 end
-
