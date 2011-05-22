@@ -11,7 +11,6 @@ autoload :Set, 'set'
 
 module Ponder
   class Thaum
-    attr_accessor :after_filters, :before_filters
     include IRC
     include AsyncIRC::Delegate
 
