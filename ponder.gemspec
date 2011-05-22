@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
     examples/echo.rb
     examples/github_blog.rb
     examples/redis_last_seen.rb
+    lib/core_ext/array.rb
     lib/ponder.rb
     lib/ponder/async_irc.rb
     lib/ponder/callback.rb
@@ -42,4 +43,3 @@ Gem::Specification.new do |s|
     spec/thaum_spec.rb
   ]
 end
-
