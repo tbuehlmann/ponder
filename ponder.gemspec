@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
 
   s.author = 'Tobias Bühlmann'
   s.email = 'tobias.buehlmann@gmx.de'
-  s.homepage = 'http://github.com/tbuehlmann/ponder'
+  s.homepage = 'https://github.com/tbuehlmann/ponder'
 
   s.required_ruby_version = '>= 1.8.6'
   s.add_dependency('eventmachine', '>= 0.12.10')
