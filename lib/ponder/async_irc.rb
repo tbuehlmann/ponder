@@ -23,9 +23,7 @@ module Ponder
 
       def try(message)
         if message =~ /:\S+ (331|332|403|442) \S+ #{Regexp.escape(@channel)} :/i
-          raw_numeric = message.scan(/^:\S+ (\d{3})/)[0][0]
-
-          case raw_numeric
+          case $1
           when '331'
             succeed({:raw_numeric => 331, :message => 'No topic is set'})
           when '332'
@@ -64,9 +62,7 @@ module Ponder
 
       def try(message)
         if message =~ /^:\S+ (307|311|312|318|319|330|401) \S+ #{Regexp.escape(@nick)}/i
-          raw_numeric = message.scan(/^:\S+ (\d{3})/)[0][0]
-
-          case raw_numeric
+          case $1
           when '307', '330'
             @whois_data[:registered] = true
           when '311'
@@ -118,9 +114,7 @@ module Ponder
 
       def try(message)
         if message =~ /:\S+ (324|329|403|442) \S+ #{Regexp.escape(@channel)}/i
-          raw_numeric = message.scan(/^:\S+ (\d{3})/)[0][0]
-
-          case raw_numeric
+          case $1
           when '324'
             @channel_information[:modes] = message.scan(/^:\S+ 324 \S+ \S+ \+(\w*)/)[0][0].split('')
             limit = message.scan(/^:\S+ 324 \S+ \S+ \+\w* (\w*)/)[0]
