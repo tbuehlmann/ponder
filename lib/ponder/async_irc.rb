@@ -10,15 +10,15 @@ module Ponder
 
       include EventMachine::Deferrable
 
-      def initialize(channel, timeout_after, ponder)
+      def initialize(channel, timeout_after, thaum)
         @channel = channel
-        @ponder = ponder
+        @thaum = thaum
 
         self.timeout(timeout_after)
-        self.errback { @ponder.deferrables.delete self }
+        self.errback { @thaum.deferrables.delete self }
 
-        @ponder.deferrables.add self
-        @ponder.raw "TOPIC #{@channel}"
+        @thaum.deferrables.add self
+        @thaum.raw "TOPIC #{@channel}"
       end
 
       def try(message)
@@ -39,7 +39,7 @@ module Ponder
       end
 
       def succeed(*args)
-        @ponder.deferrables.delete self
+        @thaum.deferrables.delete self
         set_deferred_status :succeeded, *args
       end
     end
@@ -50,16 +50,16 @@ module Ponder
 
       include EventMachine::Deferrable
 
-      def initialize(nick, timeout_after, ponder)
+      def initialize(nick, timeout_after, thaum)
         @nick = nick
-        @ponder = ponder
+        @thaum = thaum
         @whois_data = {}
 
         self.timeout(timeout_after)
-        self.errback { @ponder.deferrables.delete self }
+        self.errback { @thaum.deferrables.delete self }
 
-        @ponder.deferrables.add self
-        @ponder.raw "WHOIS #{@nick}"
+        @thaum.deferrables.add self
+        @thaum.raw "WHOIS #{@nick}"
       end
 
       def try(message)
@@ -93,7 +93,7 @@ module Ponder
       end
 
       def succeed(*args)
-        @ponder.deferrables.delete self
+        @thaum.deferrables.delete self
         set_deferred_status :succeeded, *args
       end
     end
@@ -104,16 +104,16 @@ module Ponder
 
       include EventMachine::Deferrable
 
-      def initialize(channel, timeout_after, ponder)
+      def initialize(channel, timeout_after, thaum)
         @channel = channel
-        @ponder = ponder
+        @thaum = thaum
         @channel_information = {}
 
         self.timeout(timeout_after)
         self.errback { @ponder.deferrables.delete self }
 
-        @ponder.deferrables.add self
-        @ponder.raw "MODE #{@channel}"
+        @thaum.deferrables.add self
+        @thaum.raw "MODE #{@channel}"
       end
 
       def try(message)
@@ -135,7 +135,7 @@ module Ponder
       end
 
       def succeed(*args)
-        @ponder.deferrables.delete self
+        @thaum.deferrables.delete self
         set_deferred_status :succeeded, *args
       end
     end
