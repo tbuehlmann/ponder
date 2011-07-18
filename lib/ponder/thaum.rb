@@ -134,7 +134,7 @@ module Ponder
       when /^PING \S+$/
         raw message.sub(/PING/, 'PONG')
 
-      when /^:\S+ (\d\d\d) /
+      when /^(?:\:\S+ )?(\d\d\d) /
         number = $1.to_i
         parse_event(number, :type => number, :params => $')
 
