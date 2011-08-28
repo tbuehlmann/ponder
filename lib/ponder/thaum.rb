@@ -38,7 +38,6 @@ module Ponder
       @deferrables = Set.new
 
       @connected = false
-      @reloading = false
 
       # user callbacks
       @callbacks = Hash.new { |hash, key| hash[key] = [] }
@@ -63,26 +62,24 @@ module Ponder
     end
 
     def configure(&block)
-      unless @reloading
-        block.call(@config)
+      block.call(@config)
 
-        # logger changes (if differing from initialize)
-        if @config.verbose
-          @console_logger = @config.console_logger if @config.console_logger
+      # logger changes (if differing from initialize)
+      if @config.verbose
+        @console_logger = @config.console_logger if @config.console_logger
+      else
+        @console_logger = BlindIo.new
+      end
+
+      if @config.logging
+        log_path = @config.log_path || File.join(ROOT, 'logs', 'log.log')
+        log_dir = File.dirname(log_path)
+        FileUtils.mkdir_p(log_dir) unless File.exist?(log_dir)
+
+        if @config.logger
+          @logger = @config.logger
         else
-          @console_logger = BlindIo.new
-        end
-
-        if @config.logging
-          log_path = @config.log_path || File.join(ROOT, 'logs', 'log.log')
-          log_dir = File.dirname(log_path)
-          FileUtils.mkdir_p(log_dir) unless File.exist?(log_dir)
-
-          if @config.logger
-            @logger = @config.logger
-          else
-            @logger = Twoflogger.new(log_path, File::WRONLY | File::APPEND)
-          end
+          @logger = Twoflogger.new(log_path, File::WRONLY | File::APPEND)
         end
       end
     end
@@ -103,25 +100,12 @@ module Ponder
     end
 
     def connect
-      unless @reloading
-        @logger.info '-- Starting Ponder'
-        @console_logger.info '-- Starting Ponder'
+      @logger.info '-- Starting Ponder'
+      @console_logger.info '-- Starting Ponder'
 
-        EventMachine::run do
-          @connection = EventMachine::connect(@config.server, @config.port, Connection, self)
-        end
+      EventMachine::run do
+        @connection = EventMachine::connect(@config.server, @config.port, Connection, self)
       end
-    end
-
-    def reload!
-      @reloading = true
-      @callbacks.clear
-      load $0
-      @reloading = false
-    end
-
-    def reloading?
-      @reloading
     end
 
     # parsing incoming traffic
