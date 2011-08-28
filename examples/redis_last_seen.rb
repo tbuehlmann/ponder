@@ -32,14 +32,12 @@ def remember(lowercase_nick, nick, user, host, channel, action,
     'updated_at',     Time.now.to_i)
 end
 
-@ponder = Ponder::Thaum.new
-
-@ponder.configure do |c|
-  c.server  = 'chat.freenode.org'
-  c.port    = 6667
-  c.nick    = 'Ponder'
-  c.verbose = true
-  c.logging = false
+@ponder = Ponder::Thaum.new do |t|
+  t.server  = 'chat.freenode.org'
+  t.port    = 6667
+  t.nick    = 'Ponder'
+  t.verbose = true
+  t.logging = false
 end
 
 @ponder.on :connect do
@@ -124,16 +122,24 @@ end
       @ponder.message event_data[:channel], "Too many results (#{results})."
     end
   # single search
-  elsif @redis.exists nick
-    msg = last_seen(nick)
-    if online_nick = @ponder.whois(nick)
-      msg = "#{online_nick[:nick]} is online. (#{msg})"
-    end
-    @ponder.message event_data[:channel], msg
-  elsif online_nick = @ponder.whois(nick)
-    @ponder.message event_data[:channel], "#{online_nick[:nick]} is online."
   else
-    @ponder.message event_data[:channel], "#{nick} not found."
+    @ponder.whois(nick).callback do |result|
+      message = if @redis.exists nick
+        if result
+          "#{result[:nick]} is online. (#{last_seen(nick)})"
+        else
+          last_seen(nick)
+        end
+      else
+        if result
+          "#{result[:nick]} is online."
+        else
+          "#{nick} not found."
+        end
+      end
+
+      @ponder.message event_data[:channel], message
+    end
   end
 end
 
