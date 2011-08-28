@@ -17,7 +17,8 @@ module Ponder
     attr_reader :config, :callbacks
     attr_accessor :connected, :logger, :console_logger, :deferrables
 
-    def initialize
+    def initialize(&block)
+      # default settings
       @config = OpenStruct.new(
         :server             => 'localhost',
         :port               => 6667,
@@ -30,8 +31,28 @@ module Ponder
         :reconnect_interval => 30
       )
 
-      @logger = BlindIo.new
-      @console_logger = Twoflogger.new($stdout)
+      # custom settings
+      block.call(@config)
+
+      # setting up loggers
+      @console_logger = if @config.verbose
+        Twoflogger.new($stdout)
+      else
+        BlindIO.new
+      end
+
+      @logger = if @config.logging
+        if @config.logger
+          @config.logger
+        else
+          log_path = File.join(ROOT, 'logs', 'log.log')
+          log_dir = File.dirname(log_path)
+          FileUtils.mkdir_p(log_dir) unless File.exist?(log_dir)
+          Twoflogger.new(log_path, File::WRONLY | File::APPEND)
+        end
+      else
+        BlindIo.new
+      end
 
       # when using methods like #get_topic or #whois, a Deferrable object will wait
       # for the response and call a callback. these Deferrables are stored in this Set
@@ -59,29 +80,6 @@ module Ponder
       # before and after filter
       @before_filters = Hash.new { |hash, key| hash[key] = [] }
       @after_filters = Hash.new { |hash, key| hash[key] = [] }
-    end
-
-    def configure(&block)
-      block.call(@config)
-
-      # logger changes (if differing from initialize)
-      if @config.verbose
-        @console_logger = @config.console_logger if @config.console_logger
-      else
-        @console_logger = BlindIo.new
-      end
-
-      if @config.logging
-        log_path = @config.log_path || File.join(ROOT, 'logs', 'log.log')
-        log_dir = File.dirname(log_path)
-        FileUtils.mkdir_p(log_dir) unless File.exist?(log_dir)
-
-        if @config.logger
-          @logger = @config.logger
-        else
-          @logger = Twoflogger.new(log_path, File::WRONLY | File::APPEND)
-        end
-      end
     end
 
     def on(event_types = [:channel], match = //, *options, &block)
@@ -224,3 +222,4 @@ module Ponder
     end
   end
 end
+
