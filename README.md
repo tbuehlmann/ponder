@@ -11,12 +11,10 @@ Ponder (Stibbons) is a Domain Specific Language for writing IRC Bots using the [
     require 'rubygems'
     require 'ponder'
     
-    @ponder = Ponder::Thaum.new
-    
-    @ponder.configure do |c|
-      c.nick   = 'Ponder'
-      c.server = 'irc.freenode.net'
-      c.port   = 6667
+    @ponder = Ponder::Thaum.new do |thaum|
+      thaum.nick   = 'Ponder'
+      thaum.server = 'irc.freenode.net'
+      thaum.port   = 6667
     end
 
 ### Starting the Thaum
@@ -68,7 +66,7 @@ Besides the configuration for nick, server and port as shown in the **Getting St
 
     If `logging` is set to `true`, all incoming and outgoing traffic and exceptions will be logged to logs/log.log.
     
-    You can also define your own logger, use `c.logger = @my_cool_logger` or `c.logger = Logger.new(...)`. Ponder itself just uses the #info and #error methods on the logger.
+    You can also define your own logger, using `thaum.logger = @my_cool_logger` or `thaum.logger = Logger.new(...)`. Ponder itself just uses the #info, #error and #close method on the logger.
     
     You can access the logger instance via `@ponder.logger`, so you could do: `@ponder.logger.info('I did this and that right now')`.
     
