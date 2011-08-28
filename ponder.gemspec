@@ -5,7 +5,7 @@ require 'lib/ponder/version'
 Gem::Specification.new do |s|
   s.name = 'ponder'
   s.version = Ponder::VERSION
-  s.date = '2011-05-19'
+  s.date = '2011-08-28'
   s.summary = 'IRC bot framework'
   s.description = 'Ponder (Stibbons) is a Domain Specific Language for writing IRC Bots using the EventMachine library.'
 
@@ -21,7 +21,6 @@ Gem::Specification.new do |s|
     README.md
     Rakefile
     examples/echo.rb
-    examples/github_blog.rb
     examples/redis_last_seen.rb
     lib/core_ext/array.rb
     lib/ponder.rb
@@ -43,3 +42,4 @@ Gem::Specification.new do |s|
     spec/thaum_spec.rb
   ]
 end
+
