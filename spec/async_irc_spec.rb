@@ -6,8 +6,7 @@ require 'ponder/async_irc'
 
 describe Ponder::AsyncIRC do
   before(:each) do
-    @ponder = Ponder::Thaum.new
-    @ponder.configure { |c| c.verbose = false }
+    @ponder = Ponder::Thaum.new { |c| c.verbose = false }
   end
 
   describe Ponder::AsyncIRC::Whois do

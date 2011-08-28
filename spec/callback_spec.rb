@@ -7,8 +7,7 @@ describe Ponder::Callback do
   before(:all) { @proc = Proc.new { } }
 
   before(:each) do
-    @ponder = Ponder::Thaum.new
-    @ponder.configure { |c| c.verbose = true }
+    @ponder = Ponder::Thaum.new { |c| c.verbose = true }
   end
 
   context 'tries to create a callback' do

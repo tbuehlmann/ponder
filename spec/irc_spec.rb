@@ -5,12 +5,11 @@ require 'ponder/thaum'
 
 describe Ponder::IRC do
   before(:each) do
-    @ponder = Ponder::Thaum.new
-    @ponder.configure do |c|
-      c.nick      = 'Ponder'
-      c.username  = 'Ponder'
-      c.real_name = 'Ponder Stibbons'
-      c.reconnect = true
+    @ponder = Ponder::Thaum.new do |t|
+      t.nick      = 'Ponder'
+      t.username  = 'Ponder'
+      t.real_name = 'Ponder Stibbons'
+      t.reconnect = true
     end
   end
 
@@ -26,10 +25,16 @@ describe Ponder::IRC do
   end
 
   it 'registers with the server with a password' do
+    @ponder = Ponder::Thaum.new do |t|
+      t.nick      = 'Ponder'
+      t.username  = 'Ponder'
+      t.real_name = 'Ponder Stibbons'
+      t.reconnect = true
+      t.password  = 'secret'
+    end
     @ponder.should_receive(:raw).with('NICK Ponder').once
     @ponder.should_receive(:raw).with('USER Ponder * * :Ponder Stibbons').once
     @ponder.should_receive(:raw).with('PASS secret').once
-    @ponder.configure { |c| c.password = 'secret' }
     @ponder.register
   end
 

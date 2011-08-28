@@ -8,7 +8,7 @@ describe Ponder::Thaum do
     @ponder = Ponder::Thaum.new
   end
 
-  it 'sets a default configuration without calling the #configure method' do
+  it 'sets a default configuration' do
     @ponder.config.server.should eql('localhost')
     @ponder.config.port.should equal(6667)
     @ponder.config.nick.should eql('Ponder')
@@ -19,14 +19,13 @@ describe Ponder::Thaum do
     @ponder.config.reconnect.should be_true
     @ponder.config.reconnect_interval.should equal(30)
 
-    @ponder.logger.should be_an_instance_of(Ponder::BlindIo)
-    @ponder.console_logger.should be_an_instance_of(Ponder::Twoflogger)
+    @ponder.logger.should be_an_instance_of(Ponder::Logger::BlindIo)
+    @ponder.console_logger.should be_an_instance_of(Ponder::Logger::Twoflogger)
   end
 
   it 'sets the logger correctly' do
-    FileUtils.stub!(:mkdir_p)
-    Ponder::Twoflogger.should_receive(:new)
-    @ponder.configure { |c| c.logging = true }
+    Ponder::Logger::Twoflogger.should_receive(:new).twice
+    @ponder = Ponder::Thaum.new { |t| t.logging = true }
   end
 
   it 'sets default callbacks' do

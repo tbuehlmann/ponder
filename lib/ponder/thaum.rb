@@ -1,13 +1,14 @@
 require 'core_ext/array'
+require 'fileutils'
+require 'ostruct'
+require 'set'
 require 'ponder/async_irc'
 require 'ponder/callback'
 require 'ponder/connection'
+require 'ponder/filter'
 require 'ponder/irc'
 require 'ponder/logger/twoflogger'
 require 'ponder/logger/blind_io'
-require 'ostruct'
-autoload :FileUtils, 'fileutils'
-autoload :Set, 'set'
 
 module Ponder
   class Thaum
@@ -32,13 +33,13 @@ module Ponder
       )
 
       # custom settings
-      block.call(@config)
+      block.call(@config) if block_given?
 
       # setting up loggers
       @console_logger = if @config.verbose
-        Twoflogger.new($stdout)
+        Logger::Twoflogger.new($stdout)
       else
-        BlindIO.new
+        Logger::BlindIo.new
       end
 
       @logger = if @config.logging
@@ -48,10 +49,10 @@ module Ponder
           log_path = File.join(ROOT, 'logs', 'log.log')
           log_dir = File.dirname(log_path)
           FileUtils.mkdir_p(log_dir) unless File.exist?(log_dir)
-          Twoflogger.new(log_path, File::WRONLY | File::APPEND)
+          Logger::Twoflogger.new(log_path, File::WRONLY | File::APPEND)
         end
       else
-        BlindIo.new
+        Logger::BlindIo.new
       end
 
       # when using methods like #get_topic or #whois, a Deferrable object will wait
