@@ -15,8 +15,8 @@ module Ponder
     # register when connected
     def register
       raw "NICK #{@config.nick}"
-      raw "USER #{@config.username} * * :#{@config.real_name}"
       raw "PASS #{@config.password}" if @config.password
+      raw "USER #{@config.username} * * :#{@config.real_name}"
     end
     
     # send a notice
