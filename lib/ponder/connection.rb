@@ -13,6 +13,10 @@ module Ponder
       @thaum.register
     end
 
+    def post_init
+      start_tls if @thaum.config.ssl
+    end
+
     def unbind
       @thaum.connected = false
       @thaum.process_callbacks :disconnect, {}

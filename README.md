@@ -46,6 +46,10 @@ Besides the configuration for nick, server and port as shown in the **Getting St
 
     `port` describes the port that is used for the connection. It defaults to `6667`.
 
+* `ssl`
+
+    If `ssl` is set to `true`, the Thaum will connect to the server using SSL. It defaults to `false`
+
 * `nick`
 
     `nick` describes the nick the Thaum will try to register when connecting to the server. It will not be updated if the Thaum changes its nick. It defaults to `'Ponder'`.
