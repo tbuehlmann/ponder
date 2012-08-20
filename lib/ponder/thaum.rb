@@ -30,6 +30,7 @@ module Ponder
         :logging            => false,
         :reconnect          => true,
         :reconnect_interval => 30
+        :ssl                => false
       )
 
       # custom settings
