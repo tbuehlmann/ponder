@@ -48,7 +48,7 @@ Besides the configuration for nick, server and port as shown in the **Getting St
 
 * `ssl`
 
-    If `ssl` is set to `true`, the Thaum will connect to the server using SSL. It defaults to `false`
+    If `ssl` is set to `true`, the Thaum will connect to the server using SSL. It defaults to `false`.
 
 * `nick`
 

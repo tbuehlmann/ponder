@@ -23,6 +23,7 @@ module Ponder
       @config = OpenStruct.new(
         :server             => 'localhost',
         :port               => 6667,
+        :ssl                => false,
         :nick               => 'Ponder',
         :username           => 'Ponder',
         :real_name          => 'Ponder',
@@ -30,7 +31,6 @@ module Ponder
         :logging            => false,
         :reconnect          => true,
         :reconnect_interval => 30
-        :ssl                => false
       )
 
       # custom settings
