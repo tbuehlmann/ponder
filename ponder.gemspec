@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.email = 'tobias.buehlmann@gmx.de'
   s.homepage = 'https://github.com/tbuehlmann/ponder'
 
-  s.required_ruby_version = '>= 1.8.6'
+  s.required_ruby_version = '>= 1.9.1'
   s.add_dependency('eventmachine', '>= 0.12.10')
   s.add_development_dependency('rspec')
   s.files = %w[
@@ -42,4 +42,3 @@ Gem::Specification.new do |s|
     spec/thaum_spec.rb
   ]
 end
-

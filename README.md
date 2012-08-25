@@ -3,6 +3,10 @@
 ## Description
 Ponder (Stibbons) is a Domain Specific Language for writing IRC Bots using the [EventMachine](http://github.com/eventmachine/eventmachine "EventMachine") library.
 
+## Requirements
+* Ruby >= 1.9.1
+* EventMachine >= 0.12.10
+
 ## Getting started
 ### Installation
     $ sudo gem install ponder

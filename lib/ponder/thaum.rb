@@ -1,4 +1,5 @@
 require 'core_ext/array'
+require 'fiber'
 require 'fileutils'
 require 'ostruct'
 require 'set'
@@ -151,11 +152,11 @@ module Ponder
       @deferrables.each { |d| d.try(message) }
     end
 
-    # process callbacks with its begin; rescue; end
+    # process callbacks with exception handling.
     def process_callbacks(event_type, event_data)
       @callbacks[event_type].each do |callback|
         # process chain of before_filters, callback handling and after_filters
-        process = proc do
+        fiber = Fiber.new do
           begin
             stop_running = false
 
@@ -186,9 +187,9 @@ module Ponder
 
         # defer the whole process
         if callback.options[:defer]
-          EM.defer(process)
+          EM.defer(fiber.resume)
         else
-          process.call
+          fiber.resume
         end
       end
     end

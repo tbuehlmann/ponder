@@ -1,4 +1,5 @@
 require 'thread'
+require 'fiber'
 require 'timeout'
 require 'eventmachine'
 
@@ -13,9 +14,11 @@ module Ponder
       def initialize(channel, timeout_after, thaum)
         @channel = channel
         @thaum = thaum
+        @fiber = Fiber.current
 
         self.timeout(timeout_after)
-        self.errback { @thaum.deferrables.delete self }
+        self.callback { |args| @fiber.resume(args) }
+        self.errback { @fiber.resume(nil) }
 
         @thaum.deferrables.add self
         @thaum.raw "TOPIC #{@channel}"
@@ -40,7 +43,12 @@ module Ponder
         @thaum.deferrables.delete self
         set_deferred_status :succeeded, *args
       end
-    end
+
+      def fail(*args)
+        @thaum.deferrables.delete self
+        set_deferred_status :failed
+      end
+   end
 
     class Whois
       # number of seconds the deferrable will wait for a response before failing
@@ -52,9 +60,11 @@ module Ponder
         @nick = nick
         @thaum = thaum
         @whois_data = {}
+        @fiber = Fiber.current
 
         self.timeout(timeout_after)
-        self.errback { @thaum.deferrables.delete self }
+        self.callback { |args| @fiber.resume(args) }
+        self.errback { @fiber.resume(nil) }
 
         @thaum.deferrables.add self
         @thaum.raw "WHOIS #{@nick}"
@@ -92,6 +102,11 @@ module Ponder
         @thaum.deferrables.delete self
         set_deferred_status :succeeded, *args
       end
+
+      def fail(*args)
+        @thaum.deferrables.delete self
+        set_deferred_status :failed
+      end
     end
 
     class Channel
@@ -104,9 +119,11 @@ module Ponder
         @channel = channel
         @thaum = thaum
         @channel_information = {}
+        @fiber = Fiber.current
 
         self.timeout(timeout_after)
-        self.errback { @ponder.deferrables.delete self }
+        self.callback { |args| @fiber.resume(args) }
+        self.errback { @fiber.resume(nil) }
 
         @thaum.deferrables.add self
         @thaum.raw "MODE #{@channel}"
@@ -132,19 +149,27 @@ module Ponder
         @thaum.deferrables.delete self
         set_deferred_status :succeeded, *args
       end
+
+      def fail(*args)
+        @thaum.deferrables.delete self
+        set_deferred_status :failed
+      end
     end
 
     module Delegate
       def get_topic(channel, timeout_after = AsyncIRC::Topic::TIMEOUT)
         AsyncIRC::Topic.new(channel, timeout_after, self)
+        return Fiber.yield
       end
 
       def whois(nick, timeout_after = AsyncIRC::Whois::TIMEOUT)
         AsyncIRC::Whois.new(nick, timeout_after, self)
+        return Fiber.yield
       end
 
       def channel_info(channel, timeout_after = AsyncIRC::Channel::TIMEOUT)
         AsyncIRC::Channel.new(channel, timeout_after, self)
+        return Fiber.yield
       end
     end
   end
