@@ -10,6 +10,7 @@ require 'ponder/filter'
 require 'ponder/irc'
 require 'ponder/logger/twoflogger'
 require 'ponder/logger/blind_io'
+require 'ponder/message_parser'
 
 module Ponder
   class Thaum
@@ -115,37 +116,11 @@ module Ponder
       @logger.info "<< #{message}"
       @console_logger.info "<< #{message}"
 
-      case message
-      when /^PING \S+$/
+      if message =~ /^PING \S+$/
         raw message.sub(/PING/, 'PONG')
-
-      when /^(?:\:\S+ )?(\d\d\d) /
-        number = $1.to_i
-        parse_event(number, :type => number, :params => $')
-
-      when /^:(\S+)!(\S+)@(\S+) PRIVMSG #(\S+) :/
-        parse_event(:channel, :type => :channel, :nick => $1, :user => $2, :host => $3, :channel => "##{$4}", :message => $')
-
-      when /^:(\S+)!(\S+)@(\S+) PRIVMSG \S+ :/
-        parse_event(:query, :type => :query, :nick => $1, :user => $2, :host => $3, :message => $')
-
-      when /^:(\S+)!(\S+)@(\S+) JOIN :*(\S+)$/
-        parse_event(:join, :type => :join, :nick => $1, :user => $2, :host => $3, :channel => $4)
-
-      when /^:(\S+)!(\S+)@(\S+) PART (\S+)/
-        parse_event(:part, :type => :part, :nick => $1, :user => $2, :host => $3, :channel => $4, :message => $'.sub(/ :/, ''))
-
-      when /^:(\S+)!(\S+)@(\S+) QUIT/
-        parse_event(:quit, :type => :quit, :nick => $1, :user => $2, :host => $3, :message => $'.sub(/ :/, ''))
-
-      when /^:(\S+)!(\S+)@(\S+) NICK :/
-        parse_event(:nickchange, :type => :nickchange, :nick => $1, :user => $2, :host => $3, :new_nick => $')
-
-      when /^:(\S+)!(\S+)@(\S+) KICK (\S+) (\S+) :/
-        parse_event(:kick, :type => :kick, :nick => $1, :user => $2, :host => $3, :channel => $4, :victim => $5, :reason => $')
-
-      when /^:(\S+)!(\S+)@(\S+) TOPIC (\S+) :/
-        parse_event(:topic, :type => :topic, :nick => $1, :user => $2, :host => $3, :channel => $4, :topic => $')
+      else
+       event = MessageParser.parse(message)
+       parse_event(event) if event
       end
 
       # if there are pending deferrabels, check if the message suits their matching pattern
@@ -153,7 +128,7 @@ module Ponder
     end
 
     # process callbacks with exception handling.
-    def process_callbacks(event_type, event_data)
+    def process_callbacks(event_type, event)
       @callbacks[event_type].each do |callback|
         # process chain of before_filters, callback handling and after_filters
         fiber = Fiber.new do
@@ -162,7 +137,7 @@ module Ponder
 
             # before filters (specific filters first, then :all)
             (@before_filters[event_type] + @before_filters[:all]).each do |filter|
-              if filter.call(event_type, event_data) == false
+              if filter.call(event) == false
                 stop_running = true
                 break
               end
@@ -170,11 +145,11 @@ module Ponder
 
             unless stop_running
               # handling
-              callback.call(event_type, event_data)
+              callback.call(event)
 
               # after filters (specific filters first, then :all)
               (@after_filters[event_type] + @after_filters[:all]).each do |filter|
-                filter.call(event_type, event_data)
+                filter.call(event)
               end
             end
           rescue => e
@@ -205,13 +180,13 @@ module Ponder
     private
 
     # parses incoming traffic (types)
-    def parse_event(event_type, event_data = {})
-      if ((event_type == 376) || (event_type == 422)) && !@connected
+    def parse_event(event)
+      if ((event[:type] == 376) || (event[:type] == 422)) && !@connected
         @connected = true
-        process_callbacks(:connect, event_data)
+        process_callbacks(:connect, event)
       end
 
-      process_callbacks(event_type, event_data)
+      process_callbacks(event[:type], event)
     end
 
     def filter(filter_type, event_types = :all, match = //, block = Proc.new)

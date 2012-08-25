@@ -14,13 +14,13 @@ module Ponder
       @options = options
     end
 
-    def call(event_type, event_data = {})
-      if (event_type == :channel) || (event_type == :query)
-        @proc.call(event_data) if event_data[:message] =~ @match
-      elsif event_type == :topic
-        @proc.call(event_data) if event_data[:topic] =~ @match
+    def call(event)
+      if (event[:type] == :channel) || (event[:type] == :query)
+        @proc.call(event) if event[:message] =~ @match
+      elsif event[:type] == :topic
+        @proc.call(event) if event[:topic] =~ @match
       else
-        @proc.call(event_data)
+        @proc.call(event)
       end
     end
 
