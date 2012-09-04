@@ -8,6 +8,7 @@ require 'ponder/callback'
 require 'ponder/connection'
 require 'ponder/filter'
 require 'ponder/irc'
+require 'ponder/isupport'
 require 'ponder/logger/twoflogger'
 require 'ponder/logger/blind_io'
 require 'ponder/message_parser'
@@ -17,7 +18,7 @@ module Ponder
     include IRC
     include AsyncIRC::Delegate
 
-    attr_reader :config, :callbacks
+    attr_reader :config, :callbacks, :isupport
     attr_accessor :connected, :logger, :console_logger, :deferrables
 
     def initialize(&block)
@@ -67,6 +68,9 @@ module Ponder
       # user callbacks
       @callbacks = Hash.new { |hash, key| hash[key] = [] }
 
+      # setting up isuport
+      @isupport = ISupport.new
+
       # standard callbacks for PING, VERSION, TIME and Nickname is already in use
       on :query, /^\001PING \d+\001$/ do |event_data|
         time = event_data[:message].scan(/\d+/)[0]
@@ -79,6 +83,10 @@ module Ponder
 
       on :query, /^\001TIME\001$/ do |event_data|
         notice event_data[:nick], "\001TIME #{Time.now.strftime('%a %b %d %H:%M:%S %Y')}\001"
+      end
+
+      on 005 do |event_data|
+        @isupport.parse event_data[:params]
       end
 
       # before and after filter

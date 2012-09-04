@@ -133,4 +133,3 @@ describe Ponder::IRC do
     @ponder.ban('#mended_drum', 'foo!bar@baz')
   end
 end
-
