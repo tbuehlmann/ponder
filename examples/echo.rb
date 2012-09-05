@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'ponder'
 
 # This Thaum will parrot all channel messages.
-@ponder = Ponder::Thaum.new do |t|
+@thaum = Ponder::Thaum.new do |t|
   t.server    = 'chat.freenode.org'
   t.port      = 6667
   t.nick      = 'Ponder'
@@ -11,13 +11,12 @@ require 'ponder'
   t.logging   = false
 end
 
-@ponder.on :connect do
-  @ponder.join '#ponder'
+@thaum.on :connect do
+  @thaum.join '#ponder'
 end
 
-@ponder.on :channel, // do |event_data|
-  @ponder.message event_data[:channel], event_data[:message]
+@thaum.on :channel, // do |event_data|
+  @thaum.message event_data[:channel], event_data[:message]
 end
 
-@ponder.connect
-
+@thaum.connect
