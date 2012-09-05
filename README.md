@@ -15,26 +15,26 @@ Ponder (Stibbons) is a Domain Specific Language for writing IRC Bots using the [
     require 'rubygems'
     require 'ponder'
     
-    @ponder = Ponder::Thaum.new do |thaum|
+    @thaum = Ponder::Thaum.new do |thaum|
       thaum.nick   = 'Ponder'
       thaum.server = 'irc.freenode.net'
       thaum.port   = 6667
     end
 
 ### Starting the Thaum
-    @ponder.connect
+    @thaum.connect
 
 ### Event Handling
 This naked Thaum will connect to the server and answer PING requests (and VERSION and TIME). If you want the Thaum to join a channel when it's connected, use the following:
 
-    @ponder.on :connect do
-      @ponder.join '#mended_drum'
+    @thaum.on :connect do
+      @thaum.join '#mended_drum'
     end
 
 If you want the Thaum to answer on specific channel messages, register this Event Handler:
 
-    @ponder.on :channel, /ponder/ do |event_data|
-      @ponder.message event_data[:channel], 'Heard my name!'
+    @thaum.on :channel, /ponder/ do |event_data|
+      @thaum.message event_data[:channel], 'Heard my name!'
     end
 
 Now, if an incoming channel message contains the word "ponder", the Thaum will send the message "Heard my name!" to that specific channel. See the **Advanced Event Handling** chapter for more details on how to register Event Handlers and the `event_data` hash. For more examples, have a look at the examples directory.
@@ -76,7 +76,7 @@ Besides the configuration for nick, server and port as shown in the **Getting St
     
     You can also define your own logger, using `thaum.logger = @my_cool_logger` or `thaum.logger = Logger.new(...)`. Ponder itself just uses the #info, #error and #close method on the logger.
     
-    You can access the logger instance via `@ponder.logger`, so you could do: `@ponder.logger.info('I did this and that right now')`.
+    You can access the logger instance via `@thaum.logger`, so you could do: `@thaum.logger.info('I did this and that right now')`.
     
     It defaults to `false`.
 
@@ -97,14 +97,14 @@ A Thaum can react on several events, so here is a list of handlers that can be u
 
     The `join` handler reacts, if an user joins a channel in which the Thaum is in. Example:
     
-        @ponder.on :join do
+        @thaum.on :join do
           # ...
         end
         
     If using a block variable, you have access to a hash with detailed information about the event. Example:
     
-        @ponder.on :join do |event_data|
-          @ponder.message event_data[:channel], "Hello #{event_data[:nick]}! Welcome to #{event_data[:channel]}."
+        @thaum.on :join do |event_data|
+          @thaum.message event_data[:channel], "Hello #{event_data[:nick]}! Welcome to #{event_data[:channel]}."
         end
     
     Which will greet a joined user with a channel message.
@@ -123,8 +123,8 @@ A Thaum can react on several events, so here is a list of handlers that can be u
 
     If an user sends a message to a channel, you can react with the `channel` handler. Example (from above):
     
-        @ponder.on :channel, /ponder/ do |event_data|
-          @ponder.message event_data[:channel], 'Heard my name!'
+        @thaum.on :channel, /ponder/ do |event_data|
+          @thaum.message event_data[:channel], 'Heard my name!'
         end
     
     The block variable hash contains data for the keys `:nick`, `:user`, `:host`, `:channel` and `:message`.
@@ -145,7 +145,7 @@ A Thaum can react on several events, so here is a list of handlers that can be u
 
     `topic` is for reacting on topic changes. Data hash keys are: `:nick`, `:user`, `:host`, `:channel` and `:topic`, where `:topic` is the new topic. You can provide a Regexp to just react on specific patterns:
     
-        @ponder.on :topic, /foo/ do |event_data|
+        @thaum.on :topic, /foo/ do |event_data|
           # ...
         end
     
@@ -159,7 +159,7 @@ A Thaum can react on several events, so here is a list of handlers that can be u
 
     A Thaum can seperately react on events with raw numerics, too. So you could do:
     
-        @ponder.on 301 do |event_data|
+        @thaum.on 301 do |event_data|
           # ...
         end
     
@@ -234,11 +234,11 @@ Last but not least some cool "give me something back" methods:
     Example:
     
         # Ponder, kick an user (and check if I'm allowed to command you)!
-        @ponder.on :channel, /^!kick \S+$/ do |event_data|
-          user_data = @ponder.whois(event_data[:nick])
+        @thaum.on :channel, /^!kick \S+$/ do |event_data|
+          user_data = @thaum.whois(event_data[:nick])
           if user_data[:registered] && (user_data[:channels][event_data[:channel]] == '@')
             user_to_kick = event_data[:message].split(' ')[1]
-            @ponder.kick event_data[:channel], user_to_kick, 'GO!'
+            @thaum.kick event_data[:channel], user_to_kick, 'GO!'
           end
         end
 
