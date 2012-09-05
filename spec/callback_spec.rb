@@ -30,14 +30,14 @@ describe Ponder::Callback do
 
   it "calls the callback's proc on right match" do
     callback = Ponder::Callback.new(:channel, /wizzard/, {}, Proc.new { 8 })
-    callback.call(:channel, {:message => 'I like wizzards'}).should eql(8)
+    callback.call(:type => :channel, :message => 'I like wizzards').should eql(8)
   end
 
   it "does not call the callback's proc on the wrong match" do
     p = Proc.new { 8 }
     p.should_not_receive(:call)
     callback = Ponder::Callback.new(:channel, /wizzard/, p)
-    callback.call(:channel, {:message => 'I like hot dogs'}).should be_nil
+    callback.call(:type => :channel, :message => 'I like hot dogs').should be_nil
   end
 
   it "calls the callback's proc on the right match and the right event type" do
@@ -45,7 +45,7 @@ describe Ponder::Callback do
     proc = Proc.new { @called = true }
     @ponder.on(:channel, /wizzard/, &proc)
     EM.run do
-      @ponder.process_callbacks(:channel, {:message => 'I like wizzards'})
+      @ponder.process_callbacks(:channel, {:type => :channel, :message => 'I like wizzards'})
       EM.schedule { EM.stop }
     end
 
@@ -57,11 +57,10 @@ describe Ponder::Callback do
     proc = Proc.new { @called = true }
     @ponder.on([:channel, :query], /wizzard/, &proc)
     EM.run do
-      @ponder.process_callbacks(:query, {:message => 'I like wizzards'})
+      @ponder.process_callbacks(:query, {:type => :query, :message => 'I like wizzards'})
       EM.schedule { EM.stop }
     end
 
     @called.should be_true
   end
 end
-
