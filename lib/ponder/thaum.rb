@@ -127,7 +127,7 @@ module Ponder
       if message =~ /^PING \S+$/
         raw message.sub(/PING/, 'PONG')
       else
-       event = MessageParser.parse(message)
+       event = MessageParser.parse(message, @isupport['CHANTYPES'])
        parse_event(event) if event
       end
 
