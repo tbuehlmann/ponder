@@ -167,26 +167,6 @@ A Thaum can react on several events, so here is a list of handlers that can be u
 
 For all Event Handlers there is a `:type` key in the data hash (if the variable is specified). Its value gives the type of event, like `:channel`, `:join` or `301`.
 
-You can even share handler bodies between different events. So you are able to do something like this:
-
-    @ponder.on [:join, :part, :quit] do |event_data|
-      # ...
-    end
-
-or
-
-    @ponder.on [:channel, :query], /ponder/ do |event_data|
-      @ponder.message((event_data[:channel] || event_data[:nick]), 'Yes?')
-    end
-
-or
-
-    @ponder.on [:channel, :nickchange], /foo/ do |event_data|
-      # ...
-    end
-
-They are not really shared at all, Ponder will just copy the Callback, but it's comfortable.
-
 ## Commanding the Thaum
 Command the Thaum, very simple. Just call a method listed below on the Ponder object. I will keep this short, since I assume you're at least little experienced with IRC.
 
@@ -261,34 +241,6 @@ Last but not least some cool "give me something back" methods:
             @ponder.kick event_data[:channel], user_to_kick, 'GO!'
           end
         end
-
-## Filters
-### Before Filters
-You can have Before Filters! They are called before each event handling process and can - among other things - manipulate the `event_data` hash. If a Before Filter returns `false`, no further filters (no After Filters either) are called and the event handling process won't fire up. Example:
-
-    @ponder.before_filter(:channel, /foo/) do
-      # ...
-    end
-
-This Before Filter will be called, if a channel message with the word "foo" gets in. You can use all other event types (like :query, :kick, ...) as well. Also possible is an array notation like `before_filter([:query, :channel], /foo/) ...`. If you want the filter to work an all event types, you can simply use `:all`. Filters will be called in defining order; first defined, first called. Event specific filters are called before `:all` filters.
-
-You could use it for authentication/authorization. Example:
-
-    @ponder.before_filter :channel, // do |event_data|
-      if is_an_admin?(event_data[:nick])
-        event_data[:authorized_request] = true
-      else
-        event_data[:authorized_request] = false
-      end
-    end
-
-Now, one can check for `event_data[:authorized_request]` in a callback.
-### After Filters
-After Filters work the same way as Before Filters do, just after the actual event handling process. An After Filter does not hinder later After Filters to fire up if it returns `false`. Example:
-
-    @ponder.after_filter(:all, //) do
-      # ...
-    end
 
 ## Timers
 If you need something in an event handling process to be time-displaced, you should not use `sleep`. I recommend using the comfortable timer methods EventMachine provides. A one shot timer looks like this:

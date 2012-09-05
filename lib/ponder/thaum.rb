@@ -6,7 +6,6 @@ require 'set'
 require 'ponder/async_irc'
 require 'ponder/callback'
 require 'ponder/connection'
-require 'ponder/filter'
 require 'ponder/irc'
 require 'ponder/isupport'
 require 'ponder/logger/twoflogger'
@@ -88,25 +87,13 @@ module Ponder
       on 005 do |event_data|
         @isupport.parse event_data[:params]
       end
-
-      # before and after filter
-      @before_filters = Hash.new { |hash, key| hash[key] = [] }
-      @after_filters = Hash.new { |hash, key| hash[key] = [] }
     end
 
-    def on(event_types = [:channel], match = //, *options, &block)
+    def on(event_type = :channel, match = //, *options, &block)
       options = options.extract_options!
-
-      if event_types.is_a?(Array)
-        callbacks = event_types.map { |event_type| Callback.new(event_type, match, options, block) }
-      else
-        callbacks = [Callback.new(event_types, match, options, block)]
-        event_types = [event_types]
-      end
-
-      callbacks.each_with_index do |callback, index|
-        @callbacks[event_types[index]] << callback
-      end
+      callback = Callback.new(event_type, match, options, block)
+      @callbacks[event_type] << callback
+      callback
     end
 
     def connect
@@ -135,31 +122,16 @@ module Ponder
       @deferrables.each { |d| d.try(message) }
     end
 
-    # process callbacks with exception handling.
+    # Each matching callback will run in its own fiber. So the execution
+    # of code can be stopped until necessary data (eg from a WHOIS) gets in.
+    #
+    # The callback processing is exception handled, so the EM reactor won't die
+    # from exceptions.
     def process_callbacks(event_type, event)
       @callbacks[event_type].each do |callback|
-        # process chain of before_filters, callback handling and after_filters
         fiber = Fiber.new do
           begin
-            stop_running = false
-
-            # before filters (specific filters first, then :all)
-            (@before_filters[event_type] + @before_filters[:all]).each do |filter|
-              if filter.call(event) == false
-                stop_running = true
-                break
-              end
-            end
-
-            unless stop_running
-              # handling
-              callback.call(event)
-
-              # after filters (specific filters first, then :all)
-              (@after_filters[event_type] + @after_filters[:all]).each do |filter|
-                filter.call(event)
-              end
-            end
+            callback.call(event)
           rescue => e
             [@logger, @console_logger].each do |logger|
               logger.error("-- #{e.class}: #{e.message}")
@@ -168,21 +140,14 @@ module Ponder
           end
         end
 
-        # defer the whole process
+        # If the callback has a :defer option, call it in a thread
+        # from the EM thread pool. Else call it in the reactor thread.
         if callback.options[:defer]
           EM.defer(fiber.resume)
         else
           fiber.resume
         end
       end
-    end
-
-    def before_filter(event_types = :all, match = //, &block)
-      filter(@before_filters, event_types, match, block)
-    end
-
-    def after_filter(event_types = :all, match = //, &block)
-      filter(@after_filters, event_types, match, block)
     end
 
     private
@@ -196,16 +161,5 @@ module Ponder
 
       process_callbacks(event[:type], event)
     end
-
-    def filter(filter_type, event_types = :all, match = //, block = Proc.new)
-      if event_types.is_a?(Array)
-        event_types.each do |event_type|
-          filter_type[event_type] << Filter.new(event_type, match, {}, block)
-        end
-      else
-        filter_type[event_types] << Filter.new(event_types, match, {}, block)
-      end
-    end
   end
 end
-
