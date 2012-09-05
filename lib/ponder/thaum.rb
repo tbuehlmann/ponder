@@ -91,7 +91,7 @@ module Ponder
 
     def on(event_type = :channel, match = //, *options, &block)
       options = options.extract_options!
-      callback = Callback.new(event_type, match, options, block)
+      callback = Callback.new(match, options, block)
       @callbacks[event_type] << callback
       callback
     end

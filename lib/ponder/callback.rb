@@ -2,7 +2,7 @@ module Ponder
   class Callback
     attr_reader :options
 
-    def initialize(event_type = :channel, pattern = //, options = {}, proc = Proc.new {})
+    def initialize(pattern = //, options = {}, proc = Proc.new {})
       unless pattern.is_a?(Regexp)
         raise TypeError, "Regexp for pattern expected, got #{match.class}"
       end
