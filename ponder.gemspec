@@ -21,7 +21,6 @@ Gem::Specification.new do |s|
     README.md
     Rakefile
     examples/echo.rb
-    examples/redis_last_seen.rb
     lib/core_ext/array.rb
     lib/ponder.rb
     lib/ponder/async_irc.rb
@@ -30,14 +29,17 @@ Gem::Specification.new do |s|
     lib/ponder/filter.rb
     lib/ponder/formatting.rb
     lib/ponder/irc.rb
+    lib/ponder/isupport.rb
     lib/ponder/logger/blind_io.rb
     lib/ponder/logger/twoflogger.rb
+    lib/ponder/message_parser.rb
     lib/ponder/thaum.rb
     lib/ponder/version.rb
     ponder.gemspec
     spec/async_irc_spec.rb
     spec/callback_spec.rb
     spec/irc_spec.rb
+    spec/isupport_spec.rb
     spec/spec_helper.rb
     spec/thaum_spec.rb
   ]
