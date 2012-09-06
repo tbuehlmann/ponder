@@ -70,23 +70,7 @@ module Ponder
       # setting up isuport
       @isupport = ISupport.new
 
-      # standard callbacks for PING, VERSION, TIME and Nickname is already in use
-      on :query, /^\001PING \d+\001$/ do |event_data|
-        time = event_data[:message].scan(/\d+/)[0]
-        notice event_data[:nick], "\001PING #{time}\001"
-      end
-
-      on :query, /^\001VERSION\001$/ do |event_data|
-        notice event_data[:nick], "\001VERSION Ponder #{Ponder::VERSION} (https://github.com/tbuehlmann/ponder)\001"
-      end
-
-      on :query, /^\001TIME\001$/ do |event_data|
-        notice event_data[:nick], "\001TIME #{Time.now.strftime('%a %b %d %H:%M:%S %Y')}\001"
-      end
-
-      on 005 do |event_data|
-        @isupport.parse event_data[:params]
-      end
+      setup_default_callbacks
     end
 
     def on(event_type = :channel, match = //, *options, &block)
@@ -160,6 +144,26 @@ module Ponder
       end
 
       process_callbacks(event[:type], event)
+    end
+
+    # Default callbacks for PING, VERSION, TIME and ISUPPORT processing.
+    def setup_default_callbacks
+      on :query, /^\001PING \d+\001$/ do |event_data|
+        time = event_data[:message].scan(/\d+/)[0]
+        notice event_data[:nick], "\001PING #{time}\001"
+      end
+
+      on :query, /^\001VERSION\001$/ do |event_data|
+        notice event_data[:nick], "\001VERSION Ponder #{Ponder::VERSION} (https://github.com/tbuehlmann/ponder)\001"
+      end
+
+      on :query, /^\001TIME\001$/ do |event_data|
+        notice event_data[:nick], "\001TIME #{Time.now.strftime('%a %b %d %H:%M:%S %Y')}\001"
+      end
+
+      on 005 do |event_data|
+        @isupport.parse event_data[:params]
+      end
     end
   end
 end
