@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'eventmachine'
 
 module Ponder
@@ -40,4 +39,3 @@ module Ponder
     end
   end
 end
-
