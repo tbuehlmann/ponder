@@ -15,12 +15,6 @@ module Ponder
       @options = options
     end
 
-    def call(event)
-      @proc.call(event) if matching?(event)
-    end
-
-    private
-
     def matching?(event)
       if [:channel, :query].include? event[:type]
         event[:message] =~ @pattern ? true : false
@@ -29,6 +23,10 @@ module Ponder
       else
         true
       end
+    end
+
+    def call(event)
+      @proc.call(event) if matching?(event)
     end
   end
 end
