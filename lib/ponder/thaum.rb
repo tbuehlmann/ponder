@@ -3,21 +3,23 @@ require 'fiber'
 require 'fileutils'
 require 'ostruct'
 require 'set'
-require 'ponder/async_irc'
 require 'ponder/callback'
 require 'ponder/connection'
+require 'ponder/event'
 require 'ponder/irc'
 require 'ponder/isupport'
 require 'ponder/logger/twoflogger'
 require 'ponder/logger/blind_io'
-require 'ponder/message_parser'
+require 'ponder/channel'
+require 'ponder/channel_list'
+require 'ponder/user'
+require 'ponder/user_list'
 
 module Ponder
   class Thaum
     include IRC
-    include AsyncIRC::Delegate
 
-    attr_reader :config, :callbacks, :isupport
+    attr_reader :config, :callbacks, :isupport, :channel_list, :user_list, :connection
     attr_accessor :connected, :logger, :console_logger, :deferrables
 
     def initialize(&block)
@@ -71,6 +73,7 @@ module Ponder
       @isupport = ISupport.new
 
       setup_default_callbacks
+      setup_channel_and_user_tracking
     end
 
     def on(event_type = :channel, match = //, *options, &block)
@@ -98,8 +101,8 @@ module Ponder
       if message =~ /^PING \S+$/
         raw message.sub(/PING/, 'PONG')
       else
-       event = MessageParser.parse(message, @isupport['CHANTYPES'])
-       parse_event(event) if event
+       event = Event.parse(message, @isupport['CHANTYPES'])
+       parse_event(event) unless event.empty?
       end
 
       # if there are pending deferrabels, check if the message suits their matching pattern
@@ -164,6 +167,120 @@ module Ponder
       on 005 do |event_data|
         @isupport.parse event_data[:params]
       end
+    end
+
+    def setup_channel_and_user_tracking
+      @channel_list = ChannelList.new
+      @user_list = UserList.new
+
+      on :connect do
+        thaum = User.new(@config.nick, self)
+        @user_list.add(thaum, true)
+      end
+
+      on :join do |event_data|
+        if event_data[:nick] == @config.nick
+          channel = Channel.new(event_data[:channel], self)
+          @channel_list.add channel
+          thaum = @user_list.find(@config.nick)
+          channel.add_user(thaum, [])
+        else
+          channel = @channel_list.find(event_data[:channel])
+          user = @user_list.find(event_data[:nick])
+          unless user
+            user = User.new(event_data[:nick], self)
+            @user_list.add user
+          end
+
+          channel.add_user(user, [])
+        end
+      end
+
+      on 353 do |event_data|
+        channel_name = event_data[:params].split(' ')[2]
+        channel = @channel_list.find(channel_name)
+        nicks_with_prefixes = event_data[:params].scan(/:(.*)/)[0][0].split(' ')
+        nicks, prefixes = [], []
+        channel_prefixes = @isupport['PREFIX'].values.map do |p|
+          Regexp.escape(p)
+        end.join('|')
+
+        nicks_with_prefixes.each do |nick_with_prefixes|
+          nick = nick_with_prefixes.gsub(/#{channel_prefixes}/, '')
+          prefixes = nick_with_prefixes.scan(/#{channel_prefixes}/)
+          
+          user = @user_list.find(nick)
+          unless user
+            user = User.new(nick, self)
+            @user_list.add(user)
+          end
+
+          channel.add_user(user, prefixes)
+        end
+      end
+
+      on :part do |event_data|
+        channel = @channel_list.find(event_data[:channel])
+        if event_data[:nick] == @config.nick
+          # Remove the channel from the channel_list.
+          @channel_list.remove(event_data[:channel])
+
+          # Remove all users from the user_list that do not share channels
+          # with the Thaum.
+          all_known_users = @channel_list.channels.values.map do |channel|
+            channel.users.values.map(&:first)
+          end
+
+          @user_list.kill_zombie_users(all_known_users)
+        else
+          channel.remove_user event_data[:nick]
+          remove_user = @channel_list.channels.values.none? do |channel|
+            channel.has_user?(event_data[:nick])
+          end
+
+          @user_list.remove(event_data[:nick]) if remove_user
+        end
+      end
+
+      on :kick do |event_data|
+        channel = @channel_list.find(event_data[:channel])
+        if event_data[:victim] == @config.nick
+          # Remove the channel from the channel_list.
+          @channel_list.remove(event_data[:channel])
+
+          # Remove all users from the user_list that do not share channels
+          # with the Thaum.
+          all_known_users = @channel_list.channels.values.map do |channel|
+            channel.users.values.map(&:first)
+          end
+
+          @user_list.kill_zombie_users(all_known_users)
+        else
+          channel.remove_user event_data[:victim]
+          remove_user = @channel_list.channels.values.none? do |channel|
+            channel.has_user?(event_data[:victim])
+          end
+
+          @user_list.remove(event_data[:victim]) if remove_user
+        end
+      end
+
+      on :quit do |event_data|
+        if event_data[:nick] == @config.nick
+          @channel_list.clear
+          @user_list.clear
+        else
+          @channel_list.remove_user event_data[:nick]
+          @user_list.remove event_data[:nick]
+        end
+      end
+
+      on :disconnect do |event_data|
+        @channel_list.clear
+        @user_list.clear
+      end
+
+      # TODO: on :mode
     end
   end
 end

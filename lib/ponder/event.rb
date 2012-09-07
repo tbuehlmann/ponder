@@ -1,8 +1,8 @@
 module Ponder
-  module MessageParser
+  class Event < Hash
     class << self
       def parse(message, chantypes)
-        case message
+        result_hash = case message
         when /^(?:\:\S+ )?(\d\d\d) /
           number = $1.to_i
           {:type => number, :params => $'}
@@ -24,6 +24,12 @@ module Ponder
           {:type => :topic, :nick => $1, :user => $2, :host => $3, :channel => $4, :topic => $'}
         else
           nil
+        end
+
+        if result_hash
+          new.merge(result_hash)
+        else
+          new
         end
       end
     end

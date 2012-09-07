@@ -4,7 +4,7 @@ module Ponder
 
     def initialize(pattern = //, options = {}, proc = Proc.new {})
       unless pattern.is_a?(Regexp)
-        raise TypeError, "Regexp for pattern expected, got #{match.class}"
+        raise TypeError, "Regexp for pattern expected, got #{pattern.class}"
       end
       unless proc.is_a?(Proc)
         raise TypeError, "Proc for proc expected, got #{proc.class}"
@@ -16,16 +16,12 @@ module Ponder
     end
 
     def matching?(event)
-      if event.is_a? Hash
-        if [:channel, :query].include? event[:type]
-          event[:message] =~ @pattern ? true : false
-        elsif event[:type] == :topic
-          event[:topic] =~ @pattern ? true : false
-        else
-          true
-        end
+      if [:channel, :query].include? event[:type]
+        event[:message] =~ @pattern ? true : false
+      elsif event[:type] == :topic
+        event[:topic] =~ @pattern ? true : false
       else
-        false
+        true
       end
     end
 
