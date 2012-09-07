@@ -16,12 +16,16 @@ module Ponder
     end
 
     def matching?(event)
-      if [:channel, :query].include? event[:type]
-        event[:message] =~ @pattern ? true : false
-      elsif event[:type] == :topic
-        event[:topic] =~ @pattern ? true : false
+      if event.is_a? Hash
+        if [:channel, :query].include? event[:type]
+          event[:message] =~ @pattern ? true : false
+        elsif event[:type] == :topic
+          event[:topic] =~ @pattern ? true : false
+        else
+          true
+        end
       else
-        true
+        false
       end
     end
 
