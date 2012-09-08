@@ -60,10 +60,6 @@ module Ponder
         Logger::BlindIo.new
       end
 
-      # when using methods like #get_topic or #whois, a Deferrable object will wait
-      # for the response and call a callback. these Deferrables are stored in this Set
-      @deferrables = Set.new
-
       @connected = false
 
       # user callbacks
@@ -104,9 +100,6 @@ module Ponder
        event = Event.parse(message, @isupport['CHANTYPES'])
        parse_event(event) unless event.empty?
       end
-
-      # if there are pending deferrabels, check if the message suits their matching pattern
-      @deferrables.each { |d| d.try(message) }
     end
 
     # Each matching callback will run in its own fiber. So the execution
