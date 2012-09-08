@@ -9,15 +9,15 @@ describe Ponder::Thaum do
   end
 
   it 'sets a default configuration' do
-    @thaum.config.server.should eql('localhost')
-    @thaum.config.port.should equal(6667)
-    @thaum.config.nick.should eql('Ponder')
-    @thaum.config.username.should eql('Ponder')
-    @thaum.config.real_name.should eql('Ponder')
+    @thaum.config.server.should eq('localhost')
+    @thaum.config.port.should eq(6667)
+    @thaum.config.nick.should eq('Ponder')
+    @thaum.config.username.should eq('Ponder')
+    @thaum.config.real_name.should eq('Ponder')
     @thaum.config.verbose.should be_true
     @thaum.config.logging.should be_false
     @thaum.config.reconnect.should be_true
-    @thaum.config.reconnect_interval.should equal(30)
+    @thaum.config.reconnect_interval.should eq(30)
 
     @thaum.logger.should be_an_instance_of(Ponder::Logger::BlindIo)
     @thaum.console_logger.should be_an_instance_of(Ponder::Logger::Twoflogger)
