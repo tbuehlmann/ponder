@@ -5,6 +5,7 @@ module Ponder
       @connection.send_data "#{message}\r\n"
       @logger.info ">> #{message}"
       @console_logger.info ">> #{message}"
+      message
     end
     
     # send a message
