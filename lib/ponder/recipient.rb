@@ -7,6 +7,12 @@ module Ponder
 
     private
 
+    def synchronize
+      @mutex.synchronize do
+        yield
+      end
+    end
+
     def raw(message)
       @thaum.connection.send_data "#{message}\r\n"
       @thaum.logger.info ">> #{message}"

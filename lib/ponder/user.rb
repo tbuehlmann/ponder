@@ -9,7 +9,7 @@ module Ponder
     end
 
     def nick
-      @mutex.synchronize do
+      synchronize do
         @nick
       end
     end
