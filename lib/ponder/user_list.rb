@@ -1,6 +1,8 @@
 require 'thread'
 
 module Ponder
+  # The UserList class holds information about users a Thaum is able to see
+  # in channels.
   class UserList
     def initialize
       @users = {}
