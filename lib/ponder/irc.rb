@@ -1,8 +1,14 @@
 module Ponder
   module IRC
-    # raw IRC messages
-    def raw(message)
+    # Send data.
+    def send_data(message)
       @connection.send_data "#{message}\r\n"
+      message
+    end
+
+    # Send data and log the message.
+    def raw(message)
+      send_data "#{message}"
       @loggers.info ">> #{message}"
       message
     end
@@ -107,4 +113,3 @@ module Ponder
     end
   end
 end
-

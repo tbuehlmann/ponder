@@ -35,7 +35,8 @@ module Ponder
         :verbose            => true,
         :logging            => false,
         :reconnect          => true,
-        :reconnect_interval => 30
+        :reconnect_interval => 30,
+        :hide_ping_pongs    => true
       )
 
       # custom settings
@@ -94,13 +95,18 @@ module Ponder
     # parsing incoming traffic
     def parse(message)
       message.chomp!
-      @loggers.info "<< #{message}"
 
       if message =~ /^PING \S+$/
-        raw message.sub(/PING/, 'PONG')
+        if @config.hide_ping_pongs
+          send_data message.sub(/PING/, 'PONG')
+        else
+          @loggers.info "<< #{message}"
+          raw message.sub(/PING/, 'PONG')
+        end
       else
-       event = Event.parse(message, @isupport['CHANTYPES'])
-       parse_event(event) unless event.empty?
+        @loggers.info "<< #{message}"
+        event = Event.parse(message, @isupport['CHANTYPES'])
+        parse_event(event) unless event.empty?
       end
     end
 

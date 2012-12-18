@@ -57,4 +57,27 @@ describe Ponder::Thaum do
       end
     end
   end
+
+  it 'PING PONGs' do
+    time = Time.now.to_i
+    @thaum.should_receive(:send_data).with("PONG #{time}")
+    @thaum.parse("PING #{time}")
+  end
+
+  it 'does not log PING PONGs' do
+    time = Time.now.to_i
+    @thaum.loggers.should_not_receive(:info).with(/ping/i)
+    @thaum.loggers.should_not_receive(:info).with(/pong/i)
+    @thaum.should_receive(:send_data).with("PONG #{time}")
+    @thaum.parse("PING #{time}")
+  end
+
+  it 'logs PING PONGs when configured' do
+    @thaum.config.hide_ping_pongs = false
+    time = Time.now.to_i
+    @thaum.loggers.should_receive(:info).with(/ping/i)
+    @thaum.loggers.should_receive(:info).with(/pong/i)
+    @thaum.should_receive(:send_data).with("PONG #{time}")
+    @thaum.parse("PING #{time}")
+  end
 end

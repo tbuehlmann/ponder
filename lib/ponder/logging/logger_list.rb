@@ -4,7 +4,7 @@
 module Ponder
   module Logging
     class LoggerList < Array
-      %w(debug info warn error fatal unknown silence).each do |method_name|
+      %w(debug info warn error fatal unknown).each do |method_name|
         define_method(method_name) do |*args, &block|
           each do |logger|
             logger.send(method_name, *args, &block)
