@@ -1,6 +1,6 @@
 module Ponder
   class Recipient
-  	def initialize(nick_or_name, thaum)
+    def initialize(nick_or_name, thaum)
       @thaum = thaum
       @mutex = Mutex.new
     end
