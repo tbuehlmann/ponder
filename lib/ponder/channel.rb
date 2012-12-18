@@ -11,11 +11,12 @@ module Ponder
     end
 
     def name
-      @mutex.synchronize do
+      synchronize do
         @name
       end
     end
 
+    # Experimental, no tests so far.
     def topic
       if @topic
         @topic
@@ -40,19 +41,19 @@ module Ponder
     end
 
     def add_user(user, prefixes = [])
-      @mutex.synchronize do
+      synchronize do
         @users[user.nick.downcase] = [user, prefixes]
       end
     end
 
     def remove_user(nick)
-      @mutex.synchronize do
+      synchronize do
         @users.delete nick.downcase
       end
     end
 
     def has_user?(user_or_nick)
-      @mutex.synchronize do
+      synchronize do
         nick = case user_or_nick
         when String
           user_or_nick.downcase
@@ -64,13 +65,13 @@ module Ponder
     end
 
     def users
-      @mutex.synchronize do
+      synchronize do
         @users
       end
     end
 
     def find_user(nick)
-      @mutex.synchronize do
+      synchronize do
         @users[nick.downcase]
       end
     end
