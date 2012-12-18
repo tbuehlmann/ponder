@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency('rake')
   s.files = %w[
     .travis.yml
+    Gemfile
     LICENSE
     README.md
     Rakefile
@@ -33,8 +34,9 @@ Gem::Specification.new do |s|
     lib/ponder/formatting.rb
     lib/ponder/irc.rb
     lib/ponder/isupport.rb
-    lib/ponder/logger/blind_io.rb
-    lib/ponder/logger/twoflogger.rb
+    lib/ponder/logging/blind_io.rb
+    lib/ponder/logging/logger_list.rb
+    lib/ponder/logging/twoflogger.rb
     lib/ponder/recipient.rb
     lib/ponder/thaum.rb
     lib/ponder/user.rb
@@ -47,5 +49,6 @@ Gem::Specification.new do |s|
     spec/spec_helper.rb
     spec/thaum_spec.rb
     spec/user_management.rb
+    spec/user_spec.rb
   ]
 end
