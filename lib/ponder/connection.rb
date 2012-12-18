@@ -19,18 +19,16 @@ module Ponder
     def unbind
       @thaum.connected = false
       @thaum.process_callbacks :disconnect, {}
-      @thaum.logger.info '-- Ponder disconnected'
-      @thaum.console_logger.info '-- Ponder disconnected'
+      @thaum.loggers.info '-- Ponder disconnected'
 
       if @thaum.config.reconnect
-        @thaum.logger.info "-- Reconnecting in #{@thaum.config.reconnect_interval} seconds"
-        @thaum.console_logger.info "-- Reconnecting in #{@thaum.config.reconnect_interval} seconds"
+        @thaum.loggers.info "-- Reconnecting in #{@thaum.config.reconnect_interval} seconds"
 
         EventMachine::add_timer(@thaum.config.reconnect_interval) do
           reconnect @thaum.config.server, @thaum.config.port
         end
       else
-        @thaum.logger.close
+        @thaum.loggers.close
       end
     end
 

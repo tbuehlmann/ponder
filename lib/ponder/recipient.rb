@@ -15,8 +15,7 @@ module Ponder
 
     def raw(message)
       @thaum.connection.send_data "#{message}\r\n"
-      @thaum.logger.info ">> #{message}"
-      @thaum.console_logger.info ">> #{message}"
+      @thaum.loggers.info ">> #{message}"
       message
     end
   end

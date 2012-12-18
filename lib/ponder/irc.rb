@@ -3,8 +3,7 @@ module Ponder
     # raw IRC messages
     def raw(message)
       @connection.send_data "#{message}\r\n"
-      @logger.info ">> #{message}"
-      @console_logger.info ">> #{message}"
+      @loggers.info ">> #{message}"
       message
     end
     

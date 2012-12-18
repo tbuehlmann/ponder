@@ -8,8 +8,9 @@ require 'ponder/connection'
 require 'ponder/event'
 require 'ponder/irc'
 require 'ponder/isupport'
-require 'ponder/logger/twoflogger'
-require 'ponder/logger/blind_io'
+require 'ponder/logging/twoflogger'
+require 'ponder/logging/blind_io'
+require 'ponder/logging/logger_list'
 require 'ponder/channel'
 require 'ponder/channel_list'
 require 'ponder/user'
@@ -19,8 +20,8 @@ module Ponder
   class Thaum
     include IRC
 
-    attr_reader :config, :callbacks, :isupport, :channel_list, :user_list, :connection
-    attr_accessor :connected, :logger, :console_logger, :deferrables
+    attr_reader :config, :callbacks, :isupport, :channel_list, :user_list, :connection, :loggers
+    attr_accessor :connected, :deferrables
 
     def initialize(&block)
       # default settings
@@ -42,9 +43,9 @@ module Ponder
 
       # setting up loggers
       @console_logger = if @config.verbose
-        Logger::Twoflogger.new($stdout)
+        Logging::Twoflogger.new($stdout)
       else
-        Logger::BlindIo.new
+        Logging::BlindIo.new
       end
 
       @logger = if @config.logging
@@ -54,11 +55,14 @@ module Ponder
           log_path = File.join(ROOT, 'logs', 'log.log')
           log_dir = File.dirname(log_path)
           FileUtils.mkdir_p(log_dir) unless File.exist?(log_dir)
-          Logger::Twoflogger.new(log_path, File::WRONLY | File::APPEND)
+          Logging::Twoflogger.new(log_path, File::WRONLY | File::APPEND)
         end
       else
-        Logger::BlindIo.new
+        Logging::BlindIo.new
       end
+
+      @loggers = Logging::LoggerList.new
+      @loggers.push(@console_logger, @logger)
 
       @connected = false
 
@@ -80,8 +84,7 @@ module Ponder
     end
 
     def connect
-      @logger.info '-- Starting Ponder'
-      @console_logger.info '-- Starting Ponder'
+      @loggers.info '-- Starting Ponder'
 
       EventMachine::run do
         @connection = EventMachine::connect(@config.server, @config.port, Connection, self)
@@ -91,8 +94,7 @@ module Ponder
     # parsing incoming traffic
     def parse(message)
       message.chomp!
-      @logger.info "<< #{message}"
-      @console_logger.info "<< #{message}"
+      @loggers.info "<< #{message}"
 
       if message =~ /^PING \S+$/
         raw message.sub(/PING/, 'PONG')
@@ -113,10 +115,8 @@ module Ponder
           begin
             callback.call(event)
           rescue => e
-            [@logger, @console_logger].each do |logger|
-              logger.error("-- #{e.class}: #{e.message}")
-              e.backtrace.each { |line| logger.error("-- #{line}") }
-            end
+            @loggers.error "-- #{e.class}: #{e.message}"
+            e.backtrace.each { |line| @loggers.error("-- #{line}") }
           end
         end
 

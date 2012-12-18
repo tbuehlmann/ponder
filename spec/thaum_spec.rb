@@ -19,12 +19,11 @@ describe Ponder::Thaum do
     @thaum.config.reconnect.should be_true
     @thaum.config.reconnect_interval.should eq(30)
 
-    @thaum.logger.should be_an_instance_of(Ponder::Logger::BlindIo)
-    @thaum.console_logger.should be_an_instance_of(Ponder::Logger::Twoflogger)
+    @thaum.loggers.should be_an_instance_of(Ponder::Logging::LoggerList)
   end
 
   it 'sets the logger correctly' do
-    Ponder::Logger::Twoflogger.should_receive(:new).twice
+    Ponder::Logging::Twoflogger.should_receive(:new).twice
     @thaum = Ponder::Thaum.new { |t| t.logging = true }
   end
 

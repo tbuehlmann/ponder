@@ -17,8 +17,9 @@ module Ponder
   autoload :UserList, 'ponder/user_list'
   autoload :VERSION, 'ponder/version'
 
-  module Logger
-    autoload :Twoflogger, 'ponder/logger/twoflogger'
-    autoload :BlindIo, 'ponder/logger/blind_io'
+  module Logging
+    autoload :Twoflogger, 'ponder/logging/twoflogger'
+    autoload :BlindIo, 'ponder/logging/blind_io'
+    autoload :LoggerList, 'ponder/logging/logger_list'
   end
 end
