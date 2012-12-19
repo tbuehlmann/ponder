@@ -15,8 +15,8 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 1.9.1'
   s.add_dependency('eventmachine', '>= 0.12.10')
-  s.add_development_dependency('rake')
-  s.add_development_dependency('rake')
+  s.add_development_dependency('rake', '~> 10.0')
+  s.add_development_dependency('rspec', '~> 2.12')
   s.files = %w[
     .travis.yml
     Gemfile
