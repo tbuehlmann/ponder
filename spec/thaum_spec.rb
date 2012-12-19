@@ -8,29 +8,6 @@ describe Ponder::Thaum do
     @thaum = Ponder::Thaum.new
   end
 
-  it 'sets a default configuration' do
-    @thaum.config.server.should eq('localhost')
-    @thaum.config.port.should eq(6667)
-    @thaum.config.nick.should eq('Ponder')
-    @thaum.config.username.should eq('Ponder')
-    @thaum.config.real_name.should eq('Ponder')
-    @thaum.config.verbose.should be_true
-    @thaum.config.logging.should be_false
-    @thaum.config.reconnect.should be_true
-    @thaum.config.reconnect_interval.should eq(30)
-
-    @thaum.loggers.should be_an_instance_of(Ponder::Logging::LoggerList)
-  end
-
-  it 'sets the logger correctly' do
-    Ponder::Logging::Twoflogger.should_receive(:new).twice
-    @thaum = Ponder::Thaum.new { |t| t.logging = true }
-  end
-
-  it 'sets default callbacks' do
-    @thaum.callbacks.should have(3)[:query]
-  end
-
   context 'creates a correct default callback for' do
     it 'PING PONG' do
       time = Time.now.to_i
