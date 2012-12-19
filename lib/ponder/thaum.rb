@@ -26,12 +26,12 @@ module Ponder
     def initialize(&block)
       # default settings
       @config = OpenStruct.new(
-        :server             => 'localhost',
+        :server             => 'chat.freenode.org',
         :port               => 6667,
         :ssl                => false,
-        :nick               => 'Ponder',
+        :nick               => "Ponder#{rand(10_000)}",
         :username           => 'Ponder',
-        :real_name          => 'Ponder',
+        :real_name          => 'Ponder Stibbons',
         :verbose            => true,
         :logging            => false,
         :reconnect          => true,
