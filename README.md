@@ -1,4 +1,4 @@
-# Ponder
+# Ponder ![Travis CI Status](https://travis-ci.org/tbuehlmann/ponder.png)
 
 ## Description
 
