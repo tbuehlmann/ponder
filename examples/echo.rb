@@ -3,12 +3,10 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'ponder'
 
 # This Thaum will parrot all channel messages.
-@thaum = Ponder::Thaum.new do |t|
-  t.server    = 'chat.freenode.org'
-  t.port      = 6667
-  t.nick      = 'Ponder'
-  t.verbose   = true
-  t.logging   = false
+@thaum = Ponder::Thaum.new do |config|
+  config.server  = 'chat.freenode.org'
+  config.port    = 6667
+  config.nick    = 'Ponder'
 end
 
 @thaum.on :connect do
