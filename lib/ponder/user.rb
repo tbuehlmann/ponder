@@ -3,6 +3,8 @@ require 'ponder/recipient'
 
 module Ponder
   class User < Recipient
+    attr_reader :nick
+    
     def initialize(nick, thaum)
       super
       @nick = nick
