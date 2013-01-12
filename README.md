@@ -1,4 +1,4 @@
-# Ponder ![Travis CI Status](https://travis-ci.org/tbuehlmann/ponder.png)
+# Ponder [![Gem Version](https://badge.fury.io/rb/ponder.png)](http://badge.fury.io/rb/ponder) [![Build Status](https://travis-ci.org/tbuehlmann/ponder.png)](https://travis-ci.org/tbuehlmann/ponder)
 
 ## Description
 
