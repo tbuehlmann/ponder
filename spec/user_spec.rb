@@ -9,6 +9,9 @@ describe Ponder::User do
       t.nick    = 'Ponder'
       t.verbose = false
     end
+
+    # Connected to a server.
+    @thaum.parse ':server 376 Ponder :End of /MOTD command.'
   end
 
   context 'checks the online status' do

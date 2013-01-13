@@ -48,7 +48,7 @@ module Ponder
 
     def remove_user(nick)
       synchronize do
-        @users.delete nick.downcase
+        return @users.delete(nick.downcase)
       end
     end
 

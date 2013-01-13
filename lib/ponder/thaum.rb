@@ -5,7 +5,10 @@ require 'ostruct'
 require 'set'
 require 'ponder/callback'
 require 'ponder/connection'
-require 'ponder/event'
+require 'ponder/irc/events/join'
+require 'ponder/irc/events/parser'
+require 'ponder/irc/events/part'
+require 'ponder/irc/events/quit'
 require 'ponder/irc'
 require 'ponder/isupport'
 require 'ponder/logging/twoflogger'
@@ -105,8 +108,8 @@ module Ponder
         end
       else
         @loggers.info "<< #{message}"
-        event = Event.parse(message, @isupport['CHANTYPES'])
-        parse_event(event) unless event.empty?
+        event_data = IRC::Events::Parser.parse(message, @isupport['CHANTYPES'])
+        parse_event_data(event_data) unless event_data.empty?
       end
     end
 
@@ -115,11 +118,11 @@ module Ponder
     #
     # The callback processing is exception handled, so the EM reactor won't die
     # from exceptions.
-    def process_callbacks(event_type, event)
+    def process_callbacks(event_type, event_data)
       @callbacks[event_type].each do |callback|
         fiber = Fiber.new do
           begin
-            callback.call(event)
+            callback.call(event_data)
           rescue => e
             @loggers.error "-- #{e.class}: #{e.message}"
             e.backtrace.each { |line| @loggers.error("-- #{line}") }
@@ -139,13 +142,13 @@ module Ponder
     private
 
     # parses incoming traffic (types)
-    def parse_event(event)
-      if ((event[:type] == 376) || (event[:type] == 422)) && !@connected
+    def parse_event_data(event_data)
+      if ((event_data[:type] == 376) || (event_data[:type] == 422)) && !@connected
         @connected = true
-        process_callbacks(:connect, event)
+        process_callbacks(:connect, event_data)
       end
 
-      process_callbacks(event[:type], event)
+      process_callbacks(event_data[:type], event_data)
     end
 
     # Default callbacks for PING, VERSION, TIME and ISUPPORT processing.
@@ -178,21 +181,28 @@ module Ponder
       end
 
       on :join do |event_data|
-        if event_data[:nick] == @config.nick
-          channel = Channel.new(event_data[:channel], self)
+        nick    = event_data.delete(:nick)
+        user    = event_data.delete(:user)
+        host    = event_data.delete(:host)
+        channel = event_data.delete(:channel)
+
+        # TODO: Update existing users with user/host information.
+
+        if nick == @config.nick
+          channel = Channel.new(channel, self)
           @channel_list.add channel
-          thaum = @user_list.find(@config.nick)
-          channel.add_user(thaum, [])
+          user = @user_list.find(@config.nick)
         else
-          channel = @channel_list.find(event_data[:channel])
-          user = @user_list.find(event_data[:nick])
+          channel = @channel_list.find(channel)
+          user = @user_list.find(nick)
           unless user
-            user = User.new(event_data[:nick], self)
+            user = User.new(nick, self)
             @user_list.add user
           end
-
-          channel.add_user(user, [])
         end
+
+        channel.add_user(user, [])
+        event_data[:join] = IRC::Events::Join.new(user, channel)
       end
 
       on 353 do |event_data|
@@ -219,28 +229,40 @@ module Ponder
       end
 
       on :part do |event_data|
-        channel = @channel_list.find(event_data[:channel])
-        if event_data[:nick] == @config.nick
+        nick    = event_data.delete(:nick)
+        user    = event_data.delete(:user)
+        host    = event_data.delete(:host)
+        channel = event_data.delete(:channel)
+        message = event_data.delete(:message)
+
+        # TODO: Update existing users with user/host information.
+
+        user = @user_list.find(nick)
+        channel = @channel_list.find(channel)
+        if user.thaum?
           # Remove the channel from the channel_list.
-          @channel_list.remove(event_data[:channel])
+          @channel_list.remove(channel)
 
           # Remove all users from the user_list that do not share channels
           # with the Thaum.
-          all_known_users = @channel_list.channels.values.map do |channel|
-            channel.users.values.map(&:first)
+          all_known_users = @channel_list.channels.values.map do |_channel|
+            _channel.users.values.map(&:first)
           end
 
           @user_list.kill_zombie_users(all_known_users)
         else
-          channel.remove_user event_data[:nick]
-          remove_user = @channel_list.channels.values.none? do |channel|
-            channel.has_user?(event_data[:nick])
+          channel.remove_user nick
+          remove_user = @channel_list.channels.values.none? do |_channel|
+            _channel.has_user? nick
           end
 
-          @user_list.remove(event_data[:nick]) if remove_user
+          @user_list.remove(nick) if remove_user
         end
+
+        event_data[:part] = IRC::Events::Part.new(user, channel, message)
       end
 
+      # TODO: Kick object!
       on :kick do |event_data|
         channel = @channel_list.find(event_data[:channel])
         if event_data[:victim] == @config.nick
@@ -265,13 +287,24 @@ module Ponder
       end
 
       on :quit do |event_data|
-        if event_data[:nick] == @config.nick
-          @channel_list.clear
+        nick    = event_data.delete(:nick)
+        user    = event_data.delete(:user)
+        host    = event_data.delete(:host)
+        message = event_data.delete(:message)
+
+        # TODO: Update existing users with user/host information.
+
+        user = @user_list.find nick
+
+        if user.thaum?
+          channels = @channel_list.clear
           @user_list.clear
         else
-          @channel_list.remove_user event_data[:nick]
-          @user_list.remove event_data[:nick]
+          channels = @channel_list.remove_user(nick)
+          @user_list.remove nick
         end
+
+        event_data[:quit] = IRC::Events::Quit.new(user, channels, message)
       end
 
       on :disconnect do |event_data|

@@ -32,11 +32,17 @@ module Ponder
     end
 
     def remove_user(nick)
+      channels = {}
+
       @mutex.synchronize do
-        @channels.values.each do |channel|
-          channel.remove_user nick
+        @channels.each do |channel_name, channel|
+          if channel.remove_user(nick)
+            channels[channel_name] = channel
+          end
         end
       end
+
+      channels
     end
 
     def find(channel_name)
@@ -46,9 +52,16 @@ module Ponder
     end
 
     def clear
+      channels = {}
+
       @mutex.synchronize do
+        @channels.each do |channel_name, channel|
+          channels[channel_name] = channel
+        end
         @channels.clear
       end
+
+      channels
     end
 
     def users

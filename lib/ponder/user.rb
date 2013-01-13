@@ -66,6 +66,10 @@ module Ponder
       end
     end
 
+    def thaum?
+      @nick == @thaum.config.nick
+    end
+
     def message(message)
       raw "PRIVMSG #{@nick} :#{message}"
     end

@@ -17,6 +17,15 @@ module Ponder
   autoload :UserList, 'ponder/user_list'
   autoload :VERSION, 'ponder/version'
 
+  module IRC
+    module Events
+      autoload :Join, 'ponder/irc/events/join'
+      autoload :Parser, 'ponder/irc/events/parser'
+      autoload :Part, 'ponder/irc/events/part'
+      autoload :Quit, 'ponder/irc/events/quit'
+    end
+  end
+
   module Logging
     autoload :Twoflogger, 'ponder/logging/twoflogger'
     autoload :BlindIo, 'ponder/logging/blind_io'
