@@ -30,9 +30,12 @@ Gem::Specification.new do |s|
     lib/ponder/channel.rb
     lib/ponder/channel_list.rb
     lib/ponder/connection.rb
-    lib/ponder/event.rb
     lib/ponder/formatting.rb
     lib/ponder/irc.rb
+    lib/ponder/irc/events/join.rb
+    lib/ponder/irc/events/parser.rb
+    lib/ponder/irc/events/part.rb
+    lib/ponder/irc/events/quit.rb
     lib/ponder/isupport.rb
     lib/ponder/logging/blind_io.rb
     lib/ponder/logging/logger_list.rb
@@ -46,6 +49,9 @@ Gem::Specification.new do |s|
     spec/channel_management.rb
     spec/irc_spec.rb
     spec/isupport_spec.rb
+    spec/join_spec.rb
+    spec/part_spec.rb
+    spec/quit_spec.rb
     spec/spec_helper.rb
     spec/thaum_spec.rb
     spec/user_management.rb
