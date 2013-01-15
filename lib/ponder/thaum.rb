@@ -6,6 +6,7 @@ require 'set'
 require 'ponder/callback'
 require 'ponder/connection'
 require 'ponder/irc/events/join'
+require 'ponder/irc/events/kick'
 require 'ponder/irc/events/parser'
 require 'ponder/irc/events/part'
 require 'ponder/irc/events/quit'
@@ -263,27 +264,42 @@ module Ponder
       end
 
       # TODO: Kick object!
+      # :kicker!foo@bar KICK #channel gekickter :reason
       on :kick do |event_data|
-        channel = @channel_list.find(event_data[:channel])
-        if event_data[:victim] == @config.nick
+        nick    = event_data.delete(:nick)
+        user    = event_data.delete(:user)
+        host    = event_data.delete(:host)
+        channel = event_data.delete(:channel)
+        victim  = event_data.delete(:victim)
+        message = event_data.delete(:message)
+
+        channel = @channel_list.find(channel)
+        kicker = @user_list.find(nick)
+        victim = @user_list.find(victim)
+
+        channel.remove_user victim.nick
+
+        if victim.thaum?
           # Remove the channel from the channel_list.
-          @channel_list.remove(event_data[:channel])
+          @channel_list.remove(channel)
 
           # Remove all users from the user_list that do not share channels
           # with the Thaum.
-          all_known_users = @channel_list.channels.values.map do |channel|
-            channel.users.values.map(&:first)
+          all_known_users = @channel_list.channels.values.map do |_channel|
+            _channel.users.values.map(&:first)
           end
 
           @user_list.kill_zombie_users(all_known_users)
+
         else
-          channel.remove_user event_data[:victim]
-          remove_user = @channel_list.channels.values.none? do |channel|
-            channel.has_user?(event_data[:victim])
+          remove_user = @channel_list.channels.values.none? do |_channel|
+            _channel.has_user?(victim)
           end
 
-          @user_list.remove(event_data[:victim]) if remove_user
+          @user_list.remove(victim.nick) if remove_user
         end
+
+        event_data[:kick] = Ponder::IRC::Events::Kick.new(kicker, victim, channel, message)
       end
 
       on :quit do |event_data|
@@ -313,6 +329,7 @@ module Ponder
       end
 
       # TODO: on :mode
+      # TODO: on :ban
     end
   end
 end

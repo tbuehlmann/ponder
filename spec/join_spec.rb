@@ -18,12 +18,11 @@ describe Ponder::IRC::Events::Join do
     thaum_user = @thaum.user_list.find(@thaum.config.nick)
 
     @thaum.on :join do |event_data|
-      @called = true
       channel = @thaum.channel_list.find('#mended_drum')
-
       expect(event_data[:join]).to be_kind_of Ponder::IRC::Events::Join
       expect(event_data[:join].user).to eql(thaum_user)
       expect(event_data[:join].channel).to eql(channel)
+      @called = true
     end
 
     @thaum.parse ':Ponder!foo@bar JOIN #mended_drum'
@@ -36,12 +35,11 @@ describe Ponder::IRC::Events::Join do
     channel = @thaum.channel_list.find('#mended_drum')
 
     @thaum.on :join do |event_data|
-      @called = true
       user = @thaum.user_list.find('TheLibrarian')
-
       expect(event_data[:join]).to be_kind_of Ponder::IRC::Events::Join
       expect(event_data[:join].user).to eql(user)
       expect(event_data[:join].channel).to eql(channel)
+      @called = true
     end
 
     @thaum.parse ':TheLibrarian!foo@bar JOIN #mended_drum'

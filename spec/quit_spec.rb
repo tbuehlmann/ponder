@@ -21,12 +21,11 @@ describe Ponder::IRC::Events::Quit do
   	thaum_user = @thaum.user_list.find(@thaum.config.nick)
 
     @thaum.on :quit do |event_data|
-      @called = true
-
       expect(event_data[:quit]).to be_kind_of Ponder::IRC::Events::Quit
       expect(event_data[:quit].user).to eql(thaum_user)
       expect(event_data[:quit].channels.keys).to eql(['#mended_drum', '#unseen_university'])
       expect(event_data[:quit].message).to eql('Bye!')
+      @called = true
     end
 
     @thaum.parse ':Ponder!foo@bar QUIT :Bye!'
@@ -44,12 +43,11 @@ describe Ponder::IRC::Events::Quit do
   	user = @thaum.user_list.find('TheLibrarian')
 
     @thaum.on :quit do |event_data|
-      @called = true
-
       expect(event_data[:quit]).to be_kind_of Ponder::IRC::Events::Quit
       expect(event_data[:quit].user).to eql(user)
       expect(event_data[:quit].channels.keys).to eql(['#mended_drum', '#unseen_university'])
       expect(event_data[:quit].message).to eql('Bye!')
+      @called = true
     end
 
     @thaum.parse ':TheLibrarian!foo@bar QUIT :Bye!'

@@ -20,6 +20,7 @@ module Ponder
   module IRC
     module Events
       autoload :Join, 'ponder/irc/events/join'
+      autoload :Kick, 'ponder/irc/events/kick'
       autoload :Parser, 'ponder/irc/events/parser'
       autoload :Part, 'ponder/irc/events/part'
       autoload :Quit, 'ponder/irc/events/quit'

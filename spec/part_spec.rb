@@ -20,11 +20,11 @@ describe Ponder::IRC::Events::Part do
     channel = @thaum.channel_list.find('#mended_drum')
 
     @thaum.on :part do |event_data|
-      @called = true
       expect(event_data[:part]).to be_kind_of Ponder::IRC::Events::Part
       expect(event_data[:part].user).to eql(thaum_user)
       expect(event_data[:part].channel).to eql(channel)
       expect(event_data[:part].message).to eql('Bye!')
+      @called = true
     end
     
     @thaum.parse ':Ponder!foo@bar PART #mended_drum :Bye!'
@@ -38,11 +38,11 @@ describe Ponder::IRC::Events::Part do
     channel = @thaum.channel_list.find('#mended_drum')
 
     @thaum.on :part do |event_data|
-      @called = true
       expect(event_data[:part]).to be_kind_of Ponder::IRC::Events::Part
       expect(event_data[:part].user).to eql(user)
       expect(event_data[:part].channel).to eql(channel)
       expect(event_data[:part].message).to eql('Baba!')
+      @called = true
     end
 
     @thaum.parse ':TheLibrarian!foo@bar PART #mended_drum :Baba!'
