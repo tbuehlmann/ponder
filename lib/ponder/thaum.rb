@@ -7,6 +7,7 @@ require 'ponder/callback'
 require 'ponder/connection'
 require 'ponder/irc/events/join'
 require 'ponder/irc/events/kick'
+require 'ponder/irc/events/message'
 require 'ponder/irc/events/parser'
 require 'ponder/irc/events/part'
 require 'ponder/irc/events/quit'
@@ -326,6 +327,32 @@ module Ponder
       on :disconnect do |event_data|
         @channel_list.clear
         @user_list.clear
+      end
+
+      on :channel do |event_data|
+        nick    = event_data[:nick]
+        user    = event_data[:user]
+        host    = event_data[:host]
+        channel = event_data[:channel]
+        message = event_data[:message]
+
+        channel = @channel_list.find channel
+        user = @user_list.find nick
+        # TODO: Update existing users with user/host information.
+
+        event_data[:message] = IRC::Events::Message.new(user, message, channel)
+      end
+
+      on :query do |event_data|
+        nick    = event_data[:nick]
+        user    = event_data[:user]
+        host    = event_data[:host]
+        message = event_data[:message]
+
+        user = @user_list.find nick
+        # TODO: Update existing users with user/host information.
+
+        event_data[:message] = IRC::Events::Message.new(user, message)
       end
 
       # TODO: on :mode
