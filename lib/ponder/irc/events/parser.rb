@@ -10,7 +10,7 @@ module Ponder
           when /^(?:\:\S+ )?(\d\d\d) /
             number = $1.to_i
             {:type => number, :params => $'}
-          when /^:(\S+)!(\S+)@(\S+) PRIVMSG ((?:#{chantypes.join('|')})\S+) :/
+          when /^:(\S+)!(\S+)@(\S+) PRIVMSG ((?:#{chantypes.map { |c| Regexp.escape(c) }.join('|')})\S+) :/
             {:type => :channel, :nick => $1, :user => $2, :host => $3, :channel => $4, :message => $'}
           when /^:(\S+)!(\S+)@(\S+) PRIVMSG \S+ :/
             {:type => :query, :nick => $1, :user => $2, :host => $3, :message => $'}
