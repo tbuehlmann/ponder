@@ -20,6 +20,8 @@ module Ponder
             {:type => :part, :nick => $1, :user => $2, :host => $3, :channel => $4, :message => $'.sub(/ :/, '')}
           when /^:(\S+)!(\S+)@(\S+) QUIT/
             {:type => :quit, :nick => $1, :user => $2, :host => $3, :message => $'.sub(/ :/, '')}
+          when /^:(\S+)!(\S+)@(\S+) MODE ((?:#{chantypes.join('|')})\S+) ([+-]\S+)/
+            {:type => :channel_mode, :nick => $1, :user => $2, :host => $3, :channel => $4, :modes => $5, :params => $'.lstrip}
           when /^:(\S+)!(\S+)@(\S+) NICK :/
             {:type => :nickchange, :nick => $1, :user => $2, :host => $3, :new_nick => $'}
           when /^:(\S+)!(\S+)@(\S+) KICK (\S+) (\S+) :/

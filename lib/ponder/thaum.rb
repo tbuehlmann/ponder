@@ -8,6 +8,8 @@ require 'ponder/connection'
 require 'ponder/irc/events/join'
 require 'ponder/irc/events/kick'
 require 'ponder/irc/events/message'
+require 'ponder/irc/events/channel_mode'
+require 'ponder/irc/events/mode_parser'
 require 'ponder/irc/events/parser'
 require 'ponder/irc/events/part'
 require 'ponder/irc/events/quit'
@@ -355,8 +357,30 @@ module Ponder
         event_data[:message] = IRC::Events::Message.new(user, message)
       end
 
-      # TODO: on :mode
-      # TODO: on :ban
+      on :channel_mode do |event_data|
+        # TODO: Update existing users with user/host information.
+        # nick = event_data[:nick]
+        # user = event_data[:user]
+        # host = event_data[:host]
+
+        channel = event_data.delete(:channel)
+        nick    = event_data.delete(:nick)
+        params  = event_data.delete(:params)
+        modes   = event_data.delete(:modes)
+
+        channel = @channel_list.find(channel)
+        event_data[:channel] = channel
+        event_data[:user]    = @user_list.find(nick)
+
+        mode_changes = IRC::Events::ModeParser.parse(modes, params, @isupport)
+        event_data[:channel_modes] = mode_changes.map do |mode_change|
+          IRC::Events::ChannelMode.new(mode_change.merge(:channel => channel))
+        end
+
+        event_data[:channel_modes].each do |mode|
+          channel.set_mode(mode, isupport)
+        end
+      end
     end
   end
 end

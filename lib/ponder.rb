@@ -19,9 +19,11 @@ module Ponder
 
   module IRC
     module Events
+      autoload :ChannelMode, 'ponder/irc/events/channel_mode'
       autoload :Join, 'ponder/irc/events/join'
       autoload :Kick, 'ponder/irc/events/kick'
       autoload :Message, 'ponder/irc/events/message'
+      autoload :ModeParser, 'ponder/irc/events/mode_parser'
       autoload :Parser, 'ponder/irc/events/parser'
       autoload :Part, 'ponder/irc/events/part'
       autoload :Quit, 'ponder/irc/events/quit'

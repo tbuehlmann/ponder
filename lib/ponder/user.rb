@@ -10,12 +10,6 @@ module Ponder
       @nick = nick
     end
 
-    def nick
-      synchronize do
-        @nick
-      end
-    end
-
     # Updates the properties of an user.
     def whois
       fiber = Fiber.current
