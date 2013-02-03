@@ -2,7 +2,7 @@
 
 ## Description
 
-Ponder (Stibbons) is a Domain Specific Language for writing IRC Bots using the [EventMachine](httpS://github.com/eventmachine/eventmachine "EventMachine") library.
+Ponder (Stibbons) is a Domain Specific Language for writing IRC Bots using the [EventMachine](https://github.com/eventmachine/eventmachine "EventMachine") library.
 
 ## Requirements
 * Ruby >= 1.9.2
