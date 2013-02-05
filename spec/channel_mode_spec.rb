@@ -1,7 +1,4 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-
 require 'spec_helper'
-require 'ponder/thaum'
 
 describe "Ponder::IRC::Events::ChannelMode" do
   before(:each) do
@@ -9,6 +6,8 @@ describe "Ponder::IRC::Events::ChannelMode" do
       config.nick = 'Ponder'
       config.verbose = false
     end
+
+    Ponder::Channel.any_instance.stub(:get_mode)
 
     # Connected to a server and joining a channel.
     @thaum.parse ':server 376 Ponder :End of /MOTD command.'
@@ -69,18 +68,19 @@ describe "Ponder::IRC::Events::ChannelMode" do
   context 'category PREFIX (B)' do
     it 'sets a single channel mode (+o) correctly' do
       channel = @thaum.channel_list.find('#mended_drum')
+
       @thaum.parse ':TheLibrarian!foo@bar MODE #mended_drum +o Ponder'
-      modes = channel.users['ponder'][:modes]
-      expect(modes).to eql(['o'])
+      expect(channel.modes_of('Ponder')).to eql(['o'])
     end
 
     it 'removes a single channel mode (-o) correctly' do
       channel = @thaum.channel_list.find('#mended_drum')
+
       @thaum.parse ':TheLibrarian!foo@bar MODE #mended_drum +o Ponder'
-      expect(channel.users['ponder'][:modes]).to eql(['o'])
+      expect(channel.modes_of('Ponder')).to eql(['o'])
 
       @thaum.parse ':TheLibrarian!foo@bar MODE #mended_drum -o Ponder'
-      expect(channel.users['ponder'][:modes]).to be_empty
+      expect(channel.modes_of('Ponder')).to be_empty
     end
   end
 

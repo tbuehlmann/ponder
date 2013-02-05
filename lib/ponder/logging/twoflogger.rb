@@ -1,5 +1,3 @@
-require 'logger'
-
 module Ponder
   module Logging
     class Twoflogger < ::Logger

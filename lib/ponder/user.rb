@@ -1,6 +1,3 @@
-require 'thread'
-require 'ponder/recipient'
-
 module Ponder
   class User < Recipient
     attr_reader :nick

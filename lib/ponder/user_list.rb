@@ -1,37 +1,36 @@
-require 'thread'
-
 module Ponder
   # The UserList class holds information about users a Thaum is able to see
   # in channels.
   class UserList
-    def initialize
-      @users = {}
-      @mutex = Mutex.new
-    end
+    attr_reader :users
 
-    def users
-      @mutex.synchronize do
-        @users
-      end
+    def initialize
+      @users = Set.new
+      @mutex = Mutex.new
+      @thaum_user = nil
     end
 
     def add(user, thaum_user = false)
       @mutex.synchronize do
-        @users[user.nick.downcase] = user
+        @users << user
         @thaum_user = user if thaum_user
       end
     end
 
-    def remove(nick)
+    def remove(user_or_nick)
       @mutex.synchronize do
-        remove_user_without_lock(nick)
+        user = find(user_or_nick) if user_or_nick.is_a?(String)
+        @users.delete(user)
       end
     end
 
+    # Find a User given the nick.
     def find(nick)
-      @mutex.synchronize do
-        @users[nick.downcase]
-      end
+      @users.find { |u| u.nick.downcase == nick.downcase }
+    end
+
+    def has_user?(user)
+      @users.include? user
     end
 
     def clear
@@ -40,20 +39,14 @@ module Ponder
       end
     end
 
+    # Removes all users from the UserList that don't share channels with the
+    # Thaum.
     def kill_zombie_users(users)
       @mutex.synchronize do
-        (@users.values - users).each do |user|
-          if user != @thaum_user
-            remove_user_without_lock(user.nick)
-          end
+        (@users - users - Set.new([@thaum_user])).each do |user|
+          @users.delete(user)
         end
       end
-    end
-
-    private
-
-    def remove_user_without_lock(nick)
-      @users.delete(nick.downcase)
     end
   end
 end

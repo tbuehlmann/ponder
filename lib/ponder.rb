@@ -1,38 +1,44 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
+require 'fiber'
+require 'fileutils'
+require 'logger'
+require 'ostruct'
+require 'set'
+require 'thread'
+
+require 'eventmachine'
+
+require 'core_ext/array'
 
 module Ponder
-  ROOT = File.dirname($0)
-
-  autoload :AsyncIRC, 'ponder/async_irc'
-  autoload :Callback, 'ponder/callback'
-  autoload :Channel, 'ponder/channel'
-  autoload :ChannelList, 'ponder/channel_list'
-  autoload :Connection, 'ponder/connection'
-  autoload :Event, 'ponder/event'
-  autoload :Filter, 'ponder/filter'
-  autoload :Formatting, 'ponder/formatting'
-  autoload :IRC, 'ponder/irc'
-  autoload :Thaum, 'ponder/thaum'
-  autoload :User, 'ponder/user'
-  autoload :UserList, 'ponder/user_list'
-  autoload :VERSION, 'ponder/version'
+  require 'ponder/callback'
+  require 'ponder/recipient'
+  require 'ponder/channel'
+  require 'ponder/channel_list'
+  require 'ponder/connection'
+  require 'ponder/formatting'
+  require 'ponder/irc'
+  require 'ponder/isupport'
+  require 'ponder/thaum'
+  require 'ponder/user'
+  require 'ponder/user_list'
+  require 'ponder/version'
 
   module IRC
     module Events
-      autoload :ChannelMode, 'ponder/irc/events/channel_mode'
-      autoload :Join, 'ponder/irc/events/join'
-      autoload :Kick, 'ponder/irc/events/kick'
-      autoload :Message, 'ponder/irc/events/message'
-      autoload :ModeParser, 'ponder/irc/events/mode_parser'
-      autoload :Parser, 'ponder/irc/events/parser'
-      autoload :Part, 'ponder/irc/events/part'
-      autoload :Quit, 'ponder/irc/events/quit'
+      require 'ponder/irc/events/channel_mode'
+      require 'ponder/irc/events/join'
+      require 'ponder/irc/events/kick'
+      require 'ponder/irc/events/message'
+      require 'ponder/irc/events/mode_parser'
+      require 'ponder/irc/events/parser'
+      require 'ponder/irc/events/part'
+      require 'ponder/irc/events/quit'
     end
   end
 
   module Logging
-    autoload :Twoflogger, 'ponder/logging/twoflogger'
-    autoload :BlindIo, 'ponder/logging/blind_io'
-    autoload :LoggerList, 'ponder/logging/logger_list'
+    require 'ponder/logging/blind_io'
+    require 'ponder/logging/logger_list'
+    require 'ponder/logging/twoflogger'
   end
 end

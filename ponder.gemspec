@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.add_dependency('eventmachine', '>= 0.12.10')
   s.add_development_dependency('rake', '~> 10.0')
   s.add_development_dependency('rspec', '~> 2.12')
+  s.add_development_dependency('pry', '~> 0.9')
   s.files = %w[
     Gemfile
     LICENSE
@@ -32,7 +33,11 @@ Gem::Specification.new do |s|
     lib/ponder/connection.rb
     lib/ponder/formatting.rb
     lib/ponder/irc.rb
+    lib/ponder/irc/events/channel_mode.rb
     lib/ponder/irc/events/join.rb
+    lib/ponder/irc/events/kick.rb
+    lib/ponder/irc/events/message.rb
+    lib/ponder/irc/events/mode_parser.rb
     lib/ponder/irc/events/parser.rb
     lib/ponder/irc/events/part.rb
     lib/ponder/irc/events/quit.rb
@@ -47,9 +52,12 @@ Gem::Specification.new do |s|
     lib/ponder/version.rb
     ponder.gemspec
     spec/channel_management.rb
+    spec/channel_mode_spec.rb
     spec/irc_spec.rb
     spec/isupport_spec.rb
     spec/join_spec.rb
+    spec/kick_spec.rb
+    spec/message_spec.rb
     spec/part_spec.rb
     spec/quit_spec.rb
     spec/spec_helper.rb

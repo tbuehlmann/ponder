@@ -1,5 +1,3 @@
-require 'eventmachine'
-
 module Ponder
   class Connection < EventMachine::Connection
     include EventMachine::Protocols::LineText2

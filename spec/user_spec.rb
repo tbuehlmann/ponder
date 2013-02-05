@@ -1,7 +1,4 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-
 require 'spec_helper'
-require 'ponder/thaum'
 
 describe Ponder::User do
   before(:each) do
@@ -17,6 +14,7 @@ describe Ponder::User do
   context 'checks the online status' do
     describe 'of an user' do
       it "which is online and in one of the Thaum's channels" do
+        Ponder::Channel.any_instance.stub(:get_mode)
         # Thaum joining a channel.
         @thaum.parse(':Ponder!foo@bar JOIN #mended_drum')
 
@@ -29,6 +27,7 @@ describe Ponder::User do
       end
 
       it "which is online and NOT in one of the Thaum's channels" do
+        Ponder::Channel.any_instance.stub(:get_mode)
         user = Ponder::User.new('TheLibrarian', @thaum)
         user.should_receive(:online?).once.and_call_original
         user.should_receive(:raw).with('WHOIS TheLibrarian').once
@@ -42,6 +41,7 @@ describe Ponder::User do
       end
 
       it 'which is not online' do
+        Ponder::Channel.any_instance.stub(:get_mode)
         user = Ponder::User.new('TheLibrarian', @thaum)
         user.should_receive(:online?).once.and_call_original
         user.should_receive(:raw).with('WHOIS TheLibrarian').once

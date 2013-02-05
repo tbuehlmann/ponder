@@ -8,7 +8,7 @@ module Ponder
           unless [:'+', :'-'].include?(direction)
             raise(ArgumentError, "Direction for modes argument not given. +/- needed, got: #{direction}.")
           end
-          params = params.split(/ /)
+          params = params.split(/ /) if params.is_a?(String)
           mode_changes = []
 
           modes.each do |mode|

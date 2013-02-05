@@ -1,28 +1,3 @@
-require 'core_ext/array'
-require 'fiber'
-require 'fileutils'
-require 'ostruct'
-require 'set'
-require 'ponder/callback'
-require 'ponder/connection'
-require 'ponder/irc/events/join'
-require 'ponder/irc/events/kick'
-require 'ponder/irc/events/message'
-require 'ponder/irc/events/channel_mode'
-require 'ponder/irc/events/mode_parser'
-require 'ponder/irc/events/parser'
-require 'ponder/irc/events/part'
-require 'ponder/irc/events/quit'
-require 'ponder/irc'
-require 'ponder/isupport'
-require 'ponder/logging/twoflogger'
-require 'ponder/logging/blind_io'
-require 'ponder/logging/logger_list'
-require 'ponder/channel'
-require 'ponder/channel_list'
-require 'ponder/user'
-require 'ponder/user_list'
-
 module Ponder
   class Thaum
     include IRC
@@ -60,7 +35,7 @@ module Ponder
         if @config.logger
           @config.logger
         else
-          log_path = File.join(ROOT, 'logs', 'log.log')
+          log_path = File.join($0, 'logs', 'log.log')
           log_dir = File.dirname(log_path)
           FileUtils.mkdir_p(log_dir) unless File.exist?(log_dir)
           Logging::Twoflogger.new(log_path, File::WRONLY | File::APPEND)
@@ -127,9 +102,9 @@ module Ponder
         fiber = Fiber.new do
           begin
             callback.call(event_data)
-          rescue => e
-            @loggers.error "-- #{e.class}: #{e.message}"
-            e.backtrace.each { |line| @loggers.error("-- #{line}") }
+          # rescue => e
+          #   @loggers.error "-- #{e.class}: #{e.message}"
+          #   e.backtrace.each { |line| @loggers.error("-- #{line}") }
           end
         end
 
@@ -185,24 +160,29 @@ module Ponder
       end
 
       on :join do |event_data|
-        nick    = event_data.delete(:nick)
-        user    = event_data.delete(:user)
-        host    = event_data.delete(:host)
+        joined_user = {
+          :nick => event_data.delete(:nick),
+          :user => event_data.delete(:user),
+          :host => event_data.delete(:host)
+        }
         channel = event_data.delete(:channel)
 
         # TODO: Update existing users with user/host information.
 
-        if nick == @config.nick
-          channel = Channel.new(channel, self)
-          @channel_list.add channel
-          user = @user_list.find(@config.nick)
+        # Refactor
+        user = @user_list.find(joined_user[:nick])
+        if user
+          if user.thaum?
+            channel = Channel.new(channel, self)
+            channel.get_mode
+            @channel_list.add channel
+          else
+            channel = @channel_list.find(channel)
+          end
         else
           channel = @channel_list.find(channel)
-          user = @user_list.find(nick)
-          unless user
-            user = User.new(nick, self)
-            @user_list.add user
-          end
+          user = User.new(joined_user[:nick], self)
+          @user_list.add user
         end
 
         channel.add_user(user, [])
@@ -249,14 +229,11 @@ module Ponder
 
           # Remove all users from the user_list that do not share channels
           # with the Thaum.
-          all_known_users = @channel_list.channels.values.map do |_channel|
-            _channel.users.values.map(&:first)
-          end
-
+          all_known_users = @channel_list.channels.map(&:users).flatten
           @user_list.kill_zombie_users(all_known_users)
         else
           channel.remove_user nick
-          remove_user = @channel_list.channels.values.none? do |_channel|
+          remove_user = @channel_list.channels.none? do |_channel|
             _channel.has_user? nick
           end
 
@@ -288,14 +265,10 @@ module Ponder
 
           # Remove all users from the user_list that do not share channels
           # with the Thaum.
-          all_known_users = @channel_list.channels.values.map do |_channel|
-            _channel.users.values.map(&:first)
-          end
-
+          all_known_users = @channel_list.channels.map(&:users).flatten
           @user_list.kill_zombie_users(all_known_users)
-
         else
-          remove_user = @channel_list.channels.values.none? do |_channel|
+          remove_user = @channel_list.channels.none? do |_channel|
             _channel.has_user?(victim)
           end
 
@@ -379,6 +352,41 @@ module Ponder
 
         event_data[:channel_modes].each do |mode|
           channel.set_mode(mode, isupport)
+        end
+      end
+
+      # Response to MODE command, giving back the channel modes.
+      on 324 do |event_data|
+        split = event_data[:params].split(/ /)
+        channel_name = split[1]
+        channel = @channel_list.find(channel_name)
+
+        if channel
+          modes = split[2]
+          params = split[3..-1]
+
+          mode_changes = IRC::Events::ModeParser.parse(modes, params, @isupport)
+          channel_modes = mode_changes.map do |mode_change|
+            IRC::Events::ChannelMode.new(mode_change.merge(:channel => channel))
+          end
+
+          channel_modes.each do |mode|
+            channel.set_mode(mode, isupport)
+          end
+        end
+      end
+
+      # Response to MODE command, giving back the time,
+      # the channel was created.
+      on 329 do |event_data|
+        split = event_data[:params].split(/ /)
+        channel_name = split[1]
+        channel = @channel_list.find(channel_name)
+
+        # Only set created_at if the Thaum is on the channel.
+        if channel
+          epoch_time = split[2].to_i
+          channel.created_at = Time.at(epoch_time)
         end
       end
     end

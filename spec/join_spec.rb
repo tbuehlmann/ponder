@@ -1,7 +1,4 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-
 require 'spec_helper'
-require 'ponder/thaum'
 
 describe Ponder::IRC::Events::Join do
   before(:each) do
@@ -15,6 +12,7 @@ describe Ponder::IRC::Events::Join do
   end
 
   it 'is correctly created when the Thaum joins a channel' do
+    Ponder::Channel.any_instance.stub(:get_mode)
     thaum_user = @thaum.user_list.find(@thaum.config.nick)
 
     @thaum.on :join do |event_data|
@@ -30,6 +28,7 @@ describe Ponder::IRC::Events::Join do
   end
 
   it 'is correctly created when an user joins a channel' do
+    Ponder::Channel.any_instance.stub(:get_mode)
     @thaum.parse ':Ponder!foo@bar JOIN #mended_drum'
     
     channel = @thaum.channel_list.find('#mended_drum')

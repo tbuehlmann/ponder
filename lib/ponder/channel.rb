@@ -1,7 +1,3 @@
-require 'thread'
-require 'fiber'
-require 'ponder/recipient'
-
 module Ponder
   # Data structure which is used for storing users:
   # {lower_cased_nick => {User => [modes]}}
@@ -9,12 +5,14 @@ module Ponder
   # Example:
   # {'ponder' => {:user => #<User nick="Ponder">, :modes => ['v', 'o']}}
   class Channel < Recipient
-    attr_reader :name, :users, :modes, :lists
+    attr_reader :name, :users, :users_with_modes, :modes, :lists
+    attr_accessor :created_at
 
     def initialize(name, thaum)
       super
       @name = name
-      @users = {}
+      @users = Set.new
+      @users_with_modes = {}
       @modes = {}
       @lists = Hash.new { |hash, key| hash[key] = [] }
     end
@@ -65,7 +63,7 @@ module Ponder
     end
 
     def kick(user_or_nick, reason = nil)
-      nick = user_or_nick_to_nick(nick)
+      nick = user_or_nick_to_nick(user_or_nick)
 
       if reason
         raw "KICK #{@name} #{nick} :#{reason}"
@@ -123,23 +121,54 @@ module Ponder
 
     def add_user(user, modes = [])
       synchronize do
-        @users[user.nick.downcase] = {:user => user, :modes => modes}
+        @users << user
+        @users_with_modes[user] = modes
       end
     end
 
-    def remove_user(nick)
+    def remove_user(user_or_nick)
       synchronize do
-        return @users.delete(nick.downcase)
+        if user_or_nick.is_a?(String)
+          user = find_user(user_or_nick)
+        end
+
+        @users_with_modes.delete(user)
+        @users.delete?(user) ? user : nil
       end
     end
 
     def has_user?(user_or_nick)
-      nick = user_or_nick_to_nick(user_or_nick).downcase
-      @users.key? nick
+      case user_or_nick
+      when String
+        find_user(user_or_nick) ? true : false
+      when User
+        @users.include? user_or_nick
+      end
     end
 
-    def find_user(nick)
-      @users[nick.downcase]
+    def find_user(user_or_nick)
+      case user_or_nick
+      when String
+        @users.find { |u| u.nick.downcase == user_or_nick.downcase }
+      when User
+        has_user?(user_or_nick) ? user_or_nick : nil
+      end
+    end
+
+    def find_user_with_modes(user_or_nick)
+      user = case user_or_nick
+      when String
+        @users.find { |u| u.nick.downcase == user_or_nick.downcase }
+      when User
+        has_user?(user_or_nick) ? user_or_nick : nil
+      end
+
+      {:user => user, :modes => @users_with_modes[user]} if user
+    end
+
+    def modes_of(user_or_nick)
+      user = find_user(user_or_nick)
+      @users_with_modes[user] if user
     end
 
     def set_mode(mode, isupport)
@@ -148,9 +177,9 @@ module Ponder
         if user
           case mode.direction 
           when :'+'
-            user[:modes] << mode.mode
+            @users_with_modes[user] << mode.mode
           when :'-'
-            user[:modes].delete mode.mode
+            @users_with_modes[user].delete mode.mode
           end
         end
       elsif isupport['CHANMODES']['A'].include?(mode.mode)

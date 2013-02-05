@@ -1,7 +1,4 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-
 require 'spec_helper'
-require 'ponder/thaum'
 
 describe Ponder::IRC::Events::Part do
   before(:each) do
@@ -12,10 +9,11 @@ describe Ponder::IRC::Events::Part do
 
     # Connected to a server and joined #mended_drum.
     @thaum.parse ':server 376 Ponder :End of /MOTD command.'
-    @thaum.parse ':Ponder!foo@bar JOIN #mended_drum'
   end
 
   it 'is correctly created when the Thaum parts a channel' do
+    Ponder::Channel.any_instance.stub(:get_mode)
+    @thaum.parse ':Ponder!foo@bar JOIN #mended_drum'
     thaum_user = @thaum.user_list.find(@thaum.config.nick)
     channel = @thaum.channel_list.find('#mended_drum')
 
@@ -32,6 +30,8 @@ describe Ponder::IRC::Events::Part do
   end
 
   it 'is correctly created when an user joins a channel' do
+    Ponder::Channel.any_instance.stub(:get_mode)
+    @thaum.parse ':Ponder!foo@bar JOIN #mended_drum'
     @thaum.parse ':TheLibrarian!foo@bar JOIN #mended_drum'
 
     user = @thaum.user_list.find('TheLibrarian')

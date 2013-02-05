@@ -1,7 +1,4 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-
 require 'spec_helper'
-require 'ponder/thaum'
 
 describe Ponder::IRC::Events::Kick do
   before(:each) do
@@ -12,11 +9,12 @@ describe Ponder::IRC::Events::Kick do
 
     # Connected to a server.
     @thaum.parse ':server 376 Ponder :End of /MOTD command.'
-    @thaum.parse ':Ponder!foo@bar JOIN #mended_drum'
-    @thaum.parse ':TheLibrarian!foo@bar JOIN #mended_drum'
   end
 
   it 'is correctly created when the Thaum is being kicked off a channel' do
+    Ponder::Channel.any_instance.stub(:get_mode)
+    @thaum.parse ':Ponder!foo@bar JOIN #mended_drum'
+    @thaum.parse ':TheLibrarian!foo@bar JOIN #mended_drum'
     thaum_user = @thaum.user_list.find(@thaum.config.nick)
     channel = @thaum.channel_list.find('#mended_drum')
 
@@ -36,6 +34,9 @@ describe Ponder::IRC::Events::Kick do
   end
 
   it 'is correctly created when an user is being kicked off a channel' do
+    Ponder::Channel.any_instance.stub(:get_mode)
+    @thaum.parse ':Ponder!foo@bar JOIN #mended_drum'
+    @thaum.parse ':TheLibrarian!foo@bar JOIN #mended_drum'
     thaum_user = @thaum.user_list.find('Ponder')
     user = @thaum.user_list.find('TheLibrarian')
     channel = @thaum.channel_list.find('#mended_drum')

@@ -1,79 +1,70 @@
-require 'thread'
-require 'set'
-
 module Ponder
   class ChannelList
+    attr_reader :channels
+
     def initialize
-      @channels = {}
+      @channels = Set.new
       @mutex = Mutex.new
     end
 
-    def channels
-      @mutex.synchronize do
-        @channels
-      end
-    end
-
+    # Add a Channel to the ChannelList.
     def add(channel)
       @mutex.synchronize do
-        @channels[channel.name.downcase] = channel
+        @channels << channel
       end
     end
 
+    # Removes a Channel from the ChannelList.
     def remove(channel_or_channel_name)
       @mutex.synchronize do
-        case channel_or_channel_name
-        when String
-          @channels.delete channel_or_channel_name
-        when Channel
-          @channels.delete_if { |lowercased_channel_name, channel| channel == channel_or_channel_name} 
+        if channel_or_channel_name.is_a?(String)
+          channel_or_channel_name = find(channel_or_channel_name)
         end
+ 
+        @channels.delete(channel_or_channel_name)
       end
     end
 
+    # Removes a User from all Channels from the ChannelList.
+    # Returning a Set of Channels in which the User was.
     def remove_user(nick)
-      channels = {}
-
       @mutex.synchronize do
-        @channels.each do |channel_name, channel|
+        channels = Set.new
+
+        @channels.each do |channel|
           if channel.remove_user(nick)
-            channels[channel_name] = channel
+            channels << channel
           end
         end
-      end
 
-      channels
+        channels
+      end
     end
 
+    # Finding a Channel using the lowercased Channel name.
     def find(channel_name)
-      @mutex.synchronize do
-        @channels[channel_name.downcase]
-      end
+      @channels.find { |c| c.name.downcase == channel_name.downcase }
     end
 
+    # Removes all Channels from the ChannelList and returns them.
     def clear
-      channels = {}
-
       @mutex.synchronize do
-        @channels.each do |channel_name, channel|
-          channels[channel_name] = channel
-        end
+        channels = @channels.dup
         @channels.clear
+        channels
       end
-
-      channels
     end
 
+    # Returns a Set of all Users that are in one of the Channels from the
+    # ChannelList.
     def users
-      @mutex.synchronize do
-        users = Set.new
-        @channels.values.each do |channel|
-          channel.users.each_value do |user_and_prefixes|
-            users.add user_and_prefixes.first
-          end
-        end
-        users.to_a
+      users = Set.new
+
+      @channels.each do |channel|
+        users.merge channel.users
       end
+
+      users
     end
   end
 end

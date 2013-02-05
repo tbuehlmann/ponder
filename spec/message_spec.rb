@@ -1,7 +1,4 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-
 require 'spec_helper'
-require 'ponder/thaum'
 
 describe Ponder::IRC::Events::Message do
   before(:each) do
@@ -12,11 +9,12 @@ describe Ponder::IRC::Events::Message do
 
     # Connected to a server.
     @thaum.parse ':server 376 Ponder :End of /MOTD command.'
-    @thaum.parse ':Ponder!foo@bar JOIN #mended_drum'
-    @thaum.parse ':TheLibrarian!foo@bar JOIN #mended_drum'
   end
 
   it 'is correctly created when an user writes to a channel' do
+    Ponder::Channel.any_instance.stub(:get_mode)
+    @thaum.parse ':Ponder!foo@bar JOIN #mended_drum'
+    @thaum.parse ':TheLibrarian!foo@bar JOIN #mended_drum'
     channel = @thaum.channel_list.find('#mended_drum')
     user = @thaum.user_list.find('TheLibrarian')
 
@@ -34,6 +32,9 @@ describe Ponder::IRC::Events::Message do
   end
 
   it 'is correctly created when an user writes privately to the Thaum' do
+    Ponder::Channel.any_instance.stub(:get_mode)
+    @thaum.parse ':Ponder!foo@bar JOIN #mended_drum'
+    @thaum.parse ':TheLibrarian!foo@bar JOIN #mended_drum'
     user = @thaum.user_list.find('TheLibrarian')
 
     @thaum.on :query do |event_data|
