@@ -19,25 +19,29 @@ Detailed information about using Ponder can be found in the [Project Wiki](https
 ### Usage
 
 #### Setting up the Thaum
-    require 'ponder'
+```ruby
+require 'ponder'
 
-    @thaum = Ponder::Thaum.new do |config|
-      config.nick   = 'Ponder'
-      config.server = 'chat.freenode.org'
-      config.port   = 6667
-    end
-
+@thaum = Ponder::Thaum.new do |config|
+  config.nick   = 'Ponder'
+  config.server = 'chat.freenode.org'
+  config.port   = 6667
+end
+```
 #### Add Event Handling
-    @thaum.on :connect do
-      @thaum.join '#ponder'
-    end
+```ruby
+@thaum.on :connect do
+  @thaum.join '#ponder'
+end
 
-    @thaum.on :channel, /foo/ do |event_data|
-      @thaum.message event_data[:channel], 'bar!'
-    end
-
+@thaum.on :channel, /foo/ do |event_data|
+  @thaum.message event_data[:channel], 'bar!'
+end
+```
 #### Starting the Thaum
-    @thaum.connect
+```ruby
+@thaum.connect
+```
 
 ## Discworld Context
 So, why all that silly names? Ponder Stibbons? Thaum? Twoflogger (referring to Twoflower), BlindIo? What's the Mended Drum? Who's the Librarian? Simply put, I freaking enshrine Terry Pratchett's Discworld Novels and there were no better name for this project than Ponder. Ponder Stibbons is the Head of Inadvisably Applied Magic at the Unseen University of Ankh Morpork. He researched the Thaum, like the atom, just for magic. I just love that character, so there we are. If you're a fan too or want to talk about the Discworld, the framework, whatever, don't hesitate to contact me.
