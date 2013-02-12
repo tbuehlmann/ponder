@@ -53,11 +53,11 @@ Gem::Specification.new do |s|
     ponder.gemspec
     spec/channel_management.rb
     spec/channel_mode_spec.rb
-    spec/irc_spec.rb
     spec/isupport_spec.rb
     spec/join_spec.rb
     spec/kick_spec.rb
     spec/message_spec.rb
+    spec/mode_spec.rb
     spec/part_spec.rb
     spec/quit_spec.rb
     spec/spec_helper.rb
