@@ -22,101 +22,123 @@ module Ponder
       if @topic
         @topic
       else
-        fiber = Fiber.current
-        callbacks = {}
-        [331, 332, 403, 442].each do |numeric|
-          callbacks[numeric] = @thaum.on(numeric) do |event_data|
-            topic = event_data[:params].match(':(.*)').captures.first
-            fiber.resume topic
+        connected do
+          fiber = Fiber.current
+          callbacks = {}
+          [331, 332, 403, 442].each do |numeric|
+            callbacks[numeric] = @thaum.on(numeric) do |event_data|
+              topic = event_data[:params].match(':(.*)').captures.first
+              fiber.resume topic
+            end
           end
-        end
 
-        raw "TOPIC #{@name}"
-        @topic = Fiber.yield
-        callbacks.each do |type, callback|
-          @thaum.callbacks[type].delete(callback)
-        end
+          raw "TOPIC #{@name}"
+          @topic = Fiber.yield
+          callbacks.each do |type, callback|
+            @thaum.callbacks[type].delete(callback)
+          end
 
-        @topic
+          @topic
+        end
       end
     end
 
     def topic=(topic)
-      raw "TOPIC #{@name} :#{topic}"
+      connected { raw "TOPIC #{@name} :#{topic}" }
     end
 
     def ban(hostmask)
-      mode '+b', hostmask
+      connected { mode '+b', hostmask }
     end
 
     def unban(hostmask)
-      mode '-b', hostmask
+      connected { mode '-b', hostmask }
     end
 
     def lock(key)
-      raw "MODE #{@name} +k #{key}"
+      connected { raw "MODE #{@name} +k #{key}" }
     end
 
     def unlock
-      key = @modes['k']
-      raw "MODE #{@name} -k #{key}" if key
+      connected do
+        key = @modes['k']
+        raw "MODE #{@name} -k #{key}" if key
+      end
     end
 
     def kick(user_or_nick, reason = nil)
-      nick = user_or_nick_to_nick(user_or_nick)
+      connected do
+        nick = user_or_nick_to_nick(user_or_nick)
 
-      if reason
-        raw "KICK #{@name} #{nick} :#{reason}"
-      else
-        raw "KICK #{@name} #{nick}"
+        if reason
+          raw "KICK #{@name} #{nick} :#{reason}"
+        else
+          raw "KICK #{@name} #{nick}"
+        end
       end
     end
 
     def invite(user_or_nick)
-      nick = user_or_nick_to_nick(user_or_nick)
-      raw "INVITE #{@name} #{nick}"
+      connected do
+        nick = user_or_nick_to_nick(user_or_nick)
+        raw "INVITE #{@name} #{nick}"
+      end
     end
 
     def op(user_or_nick)
-      nick = user_or_nick_to_nick(nick)
-      mode '+o', nick
+      connected do
+        nick = user_or_nick_to_nick(nick)
+        mode '+o', nick
+      end
     end
 
     def deop(user_or_nick)
-      nick = user_or_nick_to_nick(nick)
-      mode '-o', nick
+      connected do
+        nick = user_or_nick_to_nick(nick)
+        mode '-o', nick
+      end
     end
 
     def voice(user_or_nick)
-      nick = user_or_nick_to_nick(nick)
-      mode '+v', nick
+      connected do
+        nick = user_or_nick_to_nick(nick)
+        mode '+v', nick
+      end
     end
 
     def devoice(user_or_nick)
-      nick = user_or_nick_to_nick(nick)
-      mode '-v', nick
+      connected do
+        nick = user_or_nick_to_nick(nick)
+        mode '-v', nick
+      end
     end
 
     def join(key = nil)
-      if key
-        raw "JOIN #{@name} #{key}"
-      else
-        raw "JOIN #{@name}"
+      connected do
+        if key
+          raw "JOIN #{@name} #{key}"
+        else
+          raw "JOIN #{@name}"
+        end
       end
     end
 
     def part(message = nil)
-      if message
-        raw "PART #{@name} :#{message}"
-      else
-        raw "PART #{@name}"
+      connected do
+        if message
+          raw "PART #{@name} :#{message}"
+        else
+          raw "PART #{@name}"
+        end
       end
     end
 
     def hop(message = nil)
-      key = @modes['k']
-      part message
-      join key
+      connected do
+        key = @modes['k']
+        part message
+        join key
+      end
     end
 
     def add_user(user, modes = [])
@@ -214,19 +236,21 @@ module Ponder
     end
 
     def mode(modes, params = nil)
-      if params
-        raw "MODE #{@name} #{modes} #{params}"
-      else
-        raw "MODE #{@name} #{modes}"
+      connected do
+        if params
+          raw "MODE #{@name} #{modes} #{params}"
+        else
+          raw "MODE #{@name} #{modes}"
+        end
       end
     end
 
     def get_mode
-      raw "MODE #{@name}"
+      connected { raw "MODE #{@name}" }
     end
 
     def message(message)
-      raw "PRIVMSG #{@name} :#{message}"
+      connected { raw "PRIVMSG #{@name} :#{message}" }
     end
 
     def inspect

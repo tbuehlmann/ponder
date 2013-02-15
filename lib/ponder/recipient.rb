@@ -7,6 +7,10 @@ module Ponder
 
     private
 
+    def connected
+      yield if @thaum.connected
+    end
+
     def synchronize
       @mutex.synchronize do
         yield
