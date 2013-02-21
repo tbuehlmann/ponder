@@ -102,9 +102,9 @@ module Ponder
         fiber = Fiber.new do
           begin
             callback.call(event_data)
-          # rescue => e
-          #   @loggers.error "-- #{e.class}: #{e.message}"
-          #   e.backtrace.each { |line| @loggers.error("-- #{line}") }
+          rescue => e
+            @loggers.error "-- #{e.class}: #{e.message}"
+            e.backtrace.each { |line| @loggers.error("-- #{line}") }
           end
         end
 
