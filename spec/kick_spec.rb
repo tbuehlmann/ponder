@@ -53,7 +53,30 @@ describe Ponder::IRC::Events::Kick do
       @called = true
     end
 
-    @thaum.parse ':pONDER!foo@bar KICK #mended_drum TheLibrarian :Get out!'
+    @thaum.parse ':Ponder!foo@bar KICK #mended_drum TheLibrarian :Get out!'
     expect(@called).to be_true
+  end
+
+  context '@config.rejoin_after_kick is set to true' do
+    it 'rejoin a channel after being kicked' do
+      @thaum.config.rejoin_after_kick = true
+      Ponder::Channel.any_instance.stub(:get_mode)
+      @thaum.parse ':Ponder!foo@bar JOIN #mended_drum'
+      @thaum.parse ':TheLibrarian!foo@bar JOIN #mended_drum'
+      channel = @thaum.channel_list.find('#mended_drum')
+      channel.should_receive :join
+      @thaum.parse ':TheLibrarian!foo@bar KICK #mended_drum Ponder :Get out!'
+    end
+
+    it 'rejoin a channel after being kicked with a channel key' do
+      @thaum.config.rejoin_after_kick = true
+      Ponder::Channel.any_instance.stub(:get_mode)
+      @thaum.parse ':Ponder!foo@bar JOIN #mended_drum'
+      @thaum.parse ':TheLibrarian!foo@bar JOIN #mended_drum'
+      @thaum.parse ':TheLibrarian!foo@bar MODE #mended_drum +k channel_key'
+      channel = @thaum.channel_list.find('#mended_drum')
+      channel.should_receive(:join).with('channel_key')
+      @thaum.parse ':TheLibrarian!foo@bar KICK #mended_drum Ponder :Get out!'
+    end
   end
 end

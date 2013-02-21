@@ -18,7 +18,8 @@ module Ponder
         :logging            => false,
         :reconnect          => true,
         :reconnect_interval => 30,
-        :hide_ping_pongs    => true
+        :hide_ping_pongs    => true,
+        :rejoin_after_kick  => false
       )
 
       # custom settings
@@ -243,8 +244,6 @@ module Ponder
         event_data[:part] = IRC::Events::Part.new(user, channel, message)
       end
 
-      # TODO: Kick object!
-      # :kicker!foo@bar KICK #channel gekickter :reason
       on :kick do |event_data|
         nick    = event_data.delete(:nick)
         user    = event_data.delete(:user)
@@ -276,6 +275,15 @@ module Ponder
         end
 
         event_data[:kick] = Ponder::IRC::Events::Kick.new(kicker, victim, channel, message)
+      end
+
+      # If @config.rejoin_after_kick is set to `true`, let
+      # the Thaum rejoin a channel after being kicked.
+      on :kick do |event_data|
+        if @config.rejoin_after_kick && event_data[:kick].victim.thaum?
+          key = event_data[:kick].channel.modes['k']
+          event_data[:kick].channel.join key
+        end
       end
 
       on :quit do |event_data|
