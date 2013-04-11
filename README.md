@@ -41,13 +41,13 @@ end
 ```
 #### User tracking
 ```ruby
-# Print a nickname of the joined user
+# Print the joined user's nickname
 @thaum.on :join do |data|
 	user = data[:join].user
 	puts "User joined #{user.nick}"
 end
 
-# Print a nickname of the parted user
+# Print the parted user's nickname
 @thaum.on :part do |data|
 	user = data[:part].user
 	puts "User parted #{user.nick}"
