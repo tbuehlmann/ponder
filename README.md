@@ -30,17 +30,16 @@ end
 ```
 #### Event handling
 ```ruby
+# Join a channel when connected
 @thaum.on :connect do
   @thaum.join '#ponder'
 end
 
-# Echo the message back to the channel
+# Echo messages matching /foo/ back to the channel
 @thaum.on :channel, /foo/ do |event_data|
   @thaum.message event_data[:channel], 'bar!'
 end
-```
-#### User tracking
-```ruby
+
 # Print the joined user's nickname
 @thaum.on :join do |data|
 	user = data[:join].user
