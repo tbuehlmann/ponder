@@ -18,7 +18,7 @@ Detailed information about using Ponder can be found in the [Project Wiki](https
 
 ### Usage
 
-#### Setting up the Thaum
+#### Setting up
 ```ruby
 require 'ponder'
 
@@ -28,14 +28,28 @@ require 'ponder'
   config.port   = 6667
 end
 ```
-#### Add Event Handling
+#### Event handling
 ```ruby
+# Join a channel when connected
 @thaum.on :connect do
   @thaum.join '#ponder'
 end
 
+# Echo messages matching /foo/ back to the channel
 @thaum.on :channel, /foo/ do |event_data|
   @thaum.message event_data[:channel], 'bar!'
+end
+
+# Print the joined user's nickname
+@thaum.on :join do |data|
+	user = data[:join].user
+	puts "User joined #{user.nick}"
+end
+
+# Print the parted user's nickname
+@thaum.on :part do |data|
+	user = data[:part].user
+	puts "User parted #{user.nick}"
 end
 ```
 #### Starting the Thaum
