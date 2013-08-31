@@ -1,5 +1,8 @@
 # Ponder [![Gem Version](https://badge.fury.io/rb/ponder.png)](http://badge.fury.io/rb/ponder) [![Build Status](https://travis-ci.org/tbuehlmann/ponder.png)](https://travis-ci.org/tbuehlmann/ponder)
 
+## Notice
+This project is not actively maintained.
+
 ## Description
 
 Ponder (Stibbons) is a Domain Specific Language for writing IRC Bots using the [EventMachine](https://github.com/eventmachine/eventmachine "EventMachine") library.
