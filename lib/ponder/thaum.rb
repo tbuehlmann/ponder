@@ -224,7 +224,7 @@ module Ponder
 
         user = @user_list.find(nick)
         channel = @channel_list.find(channel)
-        if user.thaum?
+        if user && user.thaum?
           # Remove the channel from the channel_list.
           @channel_list.remove(channel)
 
@@ -296,7 +296,7 @@ module Ponder
 
         user = @user_list.find nick
 
-        if user.thaum?
+        if user && user.thaum?
           channels = @channel_list.clear
           @user_list.clear
         else
